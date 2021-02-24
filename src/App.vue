@@ -15,6 +15,7 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  overflow-x: hidden;
 }
 
 .row a {
@@ -24,4 +25,13 @@
     transform: rotateY(360deg);
   }
 }
+.v-event-timed{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.white-font{
+  color: white !important;
+}
+
 </style>
