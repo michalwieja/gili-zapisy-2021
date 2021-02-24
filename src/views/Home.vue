@@ -170,11 +170,12 @@
                   <div v-html="selectedEvent.details"></div>
                   <div>
                     Liczba miejsc:
-                    <span v-html="selectedEvent.reserved"></span>/
+                    <span v-html="selectedEvent.reserved"></span> /
                     <span v-html="selectedEvent.seats"></span>
                   </div>
                 </v-card-text>
                 <v-card-actions>
+                  <v-spacer></v-spacer>
                   <v-btn color="secondary" text @click="selectedOpen = false">
                     Anuluj
                   </v-btn>
@@ -235,7 +236,12 @@ export default {
 
   methods: {
     async submit() {
-      const user = this.firstName + " " + this.surname + " " + this.phone;
+      const user =
+        this.firstName +
+        " " +
+        this.surname +
+        " " +
+        `<a href="tel:${this.phone}">${this.phone}</a>`;
       await db
         .collection("schedule")
         .doc(this.selectedEvent.id)

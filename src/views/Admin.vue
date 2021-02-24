@@ -123,9 +123,11 @@
                 <v-card-title> {{ item.name }}</v-card-title>
                 <v-card-text>{{ item.start }}</v-card-text>
                 <v-divider class="mx-4"></v-divider>
-                <v-card-text v-for="user in item.users" :key="user.name">{{
-                  user
-                }}</v-card-text>
+                <v-card-text
+                  v-for="user in item.users"
+                  :key="user.name"
+                  v-html="user"
+                ></v-card-text>
               </v-card>
             </v-col>
           </v-row>
