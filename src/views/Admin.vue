@@ -66,10 +66,10 @@
         </v-dialog>
       </v-row>
       <v-app>
-        <v-app-bar app dark height="150">
+        <v-app-bar app dark :height="isMobile ? '80':'150'">
           <div class="d-flex align-center">
             <RouterLink to="/"
-              ><img alt="logo" src="@/assets/logo.svg"
+            ><img :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
             /></RouterLink>
           </div>
           <v-spacer></v-spacer>
