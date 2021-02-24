@@ -1,9 +1,26 @@
 <template>
   <v-app>
     <v-app-bar :color="selectedEvent.color" app dark height="150">
-      <div class="d-flex align-center">
-        <RouterLink to="/"><img alt="logo" src="@/assets/logo.svg"></RouterLink>
+      <div class="d-flex align-center mr-10">
+        <RouterLink to="/"
+          ><img alt="logo" src="@/assets/logo.svg"
+        /></RouterLink>
       </div>
+      <v-toolbar-title>Zapisy na zajęcia</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-row justify="space-around">
+        <a href="https://www.giligili.pl" target="_blank"
+          ><v-icon large> mdi-application </v-icon></a
+        >
+        <a href="https://www.facebook.com/giligilibawialnia/" target="_blank"
+          ><v-icon large> mdi-facebook </v-icon></a
+        >
+        <a href="https://www.instagram.com/giligili_bawialnia/" target="_blank"
+          ><v-icon large> mdi-instagram </v-icon></a
+        >
+        <a href="mailto:halo@giligili.pl"><v-icon large> mdi-email </v-icon></a>
+        <a href="tel:513-922-938"><v-icon large> mdi-cellphone </v-icon></a>
+      </v-row>
     </v-app-bar>
     <v-main>
       <v-row class="fill-height">
@@ -17,41 +34,51 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" sm="6">
-                      <v-text-field v-model="firstName" label="Imię" name="firstName"
-                                    required></v-text-field>
+                      <v-text-field
+                        v-model="firstName"
+                        label="Imię"
+                        name="firstName"
+                        required
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6">
-                      <v-text-field v-model="surname" label="Nazwisko" name="surname"
-                                    required></v-text-field>
+                      <v-text-field
+                        v-model="surname"
+                        label="Nazwisko"
+                        name="surname"
+                        required
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-text-field v-model="phone" label="Telefon" name="phone"
-                                    required></v-text-field>
+                      <v-text-field
+                        v-model="phone"
+                        label="Telefon"
+                        name="phone"
+                        required
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6">
                       <v-select
-                          :items="['0-2', '2-4', '4-6']"
-                          label="Wiek dziecka"
-                          required
+                        :items="['0-2', '2-4', '4-6']"
+                        label="Wiek dziecka"
+                        required
                       ></v-select>
                     </v-col>
                   </v-row>
+                  <v-checkbox label="Akceptuje RODO" required> </v-checkbox>
                 </v-container>
                 <small>Wszystkie pola są wymagane</small>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
-                    :color="selectedEvent.color"
-                    text
-                    @click="dialog = false"
+                  :color="selectedEvent.color"
+                  text
+                  @click="dialog = false"
                 >
                   Anuluj
                 </v-btn>
-                <v-btn
-                    :color="selectedEvent.color"
-                    type="submit"
-                >
+                <v-btn dark :color="selectedEvent.color" type="submit">
                   Potwierdź
                 </v-btn>
               </v-card-actions>
@@ -62,10 +89,10 @@
           <v-sheet height="64">
             <v-toolbar flat>
               <v-btn
-                  class="mr-4"
-                  color="grey darken-2"
-                  outlined
-                  @click="type = 'week'"
+                class="mr-4"
+                color="grey darken-2"
+                outlined
+                @click="type = 'week'"
               >
                 Obecny tydzień
               </v-btn>
@@ -82,10 +109,10 @@
               <v-menu bottom right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                      v-bind="attrs"
-                      v-on="on"
-                      color="grey darken-2"
-                      outlined
+                    v-bind="attrs"
+                    v-on="on"
+                    color="grey darken-2"
+                    outlined
                   >
                     <span>{{ typeToLabel[type] }}</span>
                     <v-icon right> mdi-menu-down</v-icon>
@@ -110,29 +137,32 @@
           </v-sheet>
           <v-sheet height="600">
             <v-calendar
-                ref="calendar"
-                v-model="focus"
-                :color="selectedEvent.color"
-                :event-color="getEventColor"
-                :events="events"
-                :first-interval="9"
-                :interval-count="10"
-                :type="type"
-                locale="pl"
-                @click:event="showEvent"
-                @click:more="viewDay"
-                @click:date="viewDay"
+              ref="calendar"
+              v-model="focus"
+              color="#ddd"
+              :event-color="getEventColor"
+              :events="events"
+              :first-interval="9"
+              :interval-count="10"
+              :type="type"
+              locale="pl"
+              @click:event="showEvent"
+              @click:more="viewDay"
+              @click:date="viewDay"
             ></v-calendar>
+            <v-alert v-if="alert" dense text type="success">
+              {{ alert }}
+            </v-alert>
             <v-menu
-                v-model="selectedOpen"
-                :activator="selectedElement"
-                :close-on-content-click="false"
-                offset-x
+              v-model="selectedOpen"
+              :activator="selectedElement"
+              :close-on-content-click="false"
+              offset-x
             >
               <v-card color="grey lighten-4" flat min-width="350px">
                 <v-toolbar :color="selectedEvent.color" dark>
                   <v-toolbar-title
-                      v-html="selectedEvent.name"
+                    v-html="selectedEvent.name"
                   ></v-toolbar-title>
                   <v-spacer></v-spacer>
                 </v-toolbar>
@@ -140,7 +170,7 @@
                   <div v-html="selectedEvent.details"></div>
                   <div>
                     Liczba miejsc:
-                    <span v-html="selectedEvent.reserved"></span> /
+                    <span v-html="selectedEvent.reserved"></span>/
                     <span v-html="selectedEvent.seats"></span>
                   </div>
                 </v-card-text>
@@ -149,9 +179,10 @@
                     Anuluj
                   </v-btn>
                   <v-btn
-                      :color="selectedEvent.color"
-                      :disabled="selectedEvent.reserved === selectedEvent.seats"
-                      @click="openModal"
+                    dark
+                    :color="selectedEvent.color"
+                    :disabled="selectedEvent.reserved === selectedEvent.seats"
+                    @click="openModal"
                   >
                     Zapisz
                   </v-btn>
@@ -166,36 +197,36 @@
 </template>
 
 <script>
-import { db } from '@/main.js';
+import { db } from "@/main.js";
 
 export default {
-  name: 'App',
+  name: "App",
 
   data: () => ({
-    focus: '',
-    type: 'week',
+    focus: "",
+    type: "week",
     typeToLabel: {
-      month: 'Miesiąc',
-      week: 'Tydzień',
-      day: 'Dzień',
-      '4day': '4 dni',
+      month: "Miesiąc",
+      week: "Tydzień",
+      day: "Dzień",
+      "4day": "4 dni",
     },
 
-    firstName: '',
-    surname: '',
-    phone: '',
+    firstName: "",
+    surname: "",
+    phone: "",
     name: null,
     details: null,
     seats: 5,
     start: null,
     end: null,
-    color: '#fof',
+    color: "#fof",
     selectedEvent: {},
     selectedElement: null,
     selectedOpen: false,
     events: [],
     dialog: false,
-    isDisabled: false,
+    alert: null,
   }),
 
   mounted() {
@@ -204,17 +235,18 @@ export default {
 
   methods: {
     async submit() {
-      const user = this.firstName + ' ' + this.surname + ' ' + this.phone;
+      const user = this.firstName + " " + this.surname + " " + this.phone;
       await db
-          .collection('schedule')
-          .doc(this.selectedEvent.id)
-          .update({
-            reserved: this.selectedEvent.reserved + 1,
-            users: [...this.selectedEvent.users, user]
+        .collection("schedule")
+        .doc(this.selectedEvent.id)
+        .update({
+          reserved: this.selectedEvent.reserved + 1,
+          users: [...this.selectedEvent.users, user],
+        });
 
-          });
       this.getEvents();
       this.dialog = false;
+      this.alert = "Gratulacje! Widzimiy się na zajęciach :)";
     },
 
     openModal() {
@@ -222,8 +254,7 @@ export default {
       this.selectedOpen = false;
     },
     async getEvents() {
-      let snapshot = await db.collection('schedule')
-          .get();
+      let snapshot = await db.collection("schedule").get();
       let events = [];
       snapshot.forEach((doc) => {
         let eventData = doc.data();
@@ -237,10 +268,10 @@ export default {
     },
     viewDay({ date }) {
       this.focus = date;
-      this.type = 'day';
+      this.type = "day";
     },
     setToday() {
-      this.focus = '';
+      this.focus = "";
     },
     prev() {
       this.$refs.calendar.prev();
@@ -248,10 +279,7 @@ export default {
     next() {
       this.$refs.calendar.next();
     },
-    showEvent({
-      nativeEvent,
-      event
-    }) {
+    showEvent({ nativeEvent, event }) {
       const open = () => {
         this.selectedEvent = event;
         this.selectedElement = nativeEvent.target;
