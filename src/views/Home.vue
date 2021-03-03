@@ -7,9 +7,20 @@
         /></RouterLink>
       </div>
       <v-toolbar-title v-if="!isMobile">Zapisy na zajęcia</v-toolbar-title>
+
       <v-spacer></v-spacer>
-      <v-row justify="space-around">
-        <a href="https://www.giligili.pl" target="_blank"
+      <div v-if="admin">
+        <v-avatar class="mr-4" color="#C87072" size="56"
+        >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
+        </v-avatar>
+        <v-btn-toggle>
+
+          <v-btn @click="add_dialog = true">Dodaj</v-btn>
+          <v-btn @click="logout">Wyloguj</v-btn>
+        </v-btn-toggle>
+      </div>
+      <v-row v-if="!admin" justify="space-around">
+        <a a href="https://www.giligili.pl" target="_blank"
         >
           <v-icon large> mdi-application</v-icon>
         </a
@@ -34,68 +45,6 @@
     </v-app-bar>
     <v-main>
       <v-row class="fill-height">
-        <v-dialog v-model="dialog" max-width="600px">
-          <v-card>
-            <form @submit.prevent="submit">
-              <v-card-title>
-                <span class="headline">Zapisz się</span>
-              </v-card-title>
-              <v-card-text>
-                <v-container>
-                  <v-row>
-                    <v-col cols="12" sm="6">
-                      <v-text-field
-                          v-model="firstName"
-                          label="Imię"
-                          name="firstName"
-                          required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-text-field
-                          v-model="surname"
-                          label="Nazwisko"
-                          name="surname"
-                          required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12">
-                      <v-text-field
-                          v-model="phone"
-                          label="Telefon"
-                          name="phone"
-                          required
-                      ></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6">
-                      <v-select
-                          :items="['0-2', '2-4', '4-6']"
-                          label="Wiek dziecka"
-                          required
-                      ></v-select>
-                    </v-col>
-                  </v-row>
-                  <v-checkbox :color="selectedEvent.color"
-                              label="Akceptuje RODO" required></v-checkbox>
-                </v-container>
-                <small>Wszystkie pola są wymagane</small>
-              </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                    :color="selectedEvent.color"
-                    text
-                    @click="dialog = false"
-                >
-                  Anuluj
-                </v-btn>
-                <v-btn :color="selectedEvent.color" dark type="submit">
-                  Potwierdź
-                </v-btn>
-              </v-card-actions>
-            </form>
-          </v-card>
-        </v-dialog>
         <v-col>
           <v-sheet height="64">
             <v-toolbar flat>
@@ -175,11 +124,12 @@
               <v-card color="grey lighten-4" flat min-width="280px">
                 <v-toolbar :color="selectedEvent.color" dark>
                   <v-toolbar-title
-                      v-html="selectedEvent.name"
-                  ></v-toolbar-title>
+
+                  >{{ selectedEvent.name }} | {{ selectedEvent.start }}
+                  </v-toolbar-title>
                   <v-spacer></v-spacer>
                 </v-toolbar>
-                <v-card-text>
+                <v-card-text v-if="!admin">
                   <div v-html="selectedEvent.details"></div>
                   <div>
                     Liczba miejsc:
@@ -187,18 +137,33 @@
                     <span v-html="selectedEvent.seats"></span>
                   </div>
                 </v-card-text>
+                <v-card-text v-if="admin">
+                  <v-card-text
+                      v-for="user in selectedEvent.users"
+                      :key="user.name"
+                      v-html="user"
+                  ></v-card-text>
+                </v-card-text>
+
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="secondary" text @click="selectedOpen = false">
                     Anuluj
                   </v-btn>
-                  <v-btn
-                      :color="selectedEvent.color"
-                      :disabled="selectedEvent.reserved == selectedEvent.seats"
-                      class="white-font"
-                      @click="openModal"
+                  <v-btn v-if="!admin"
+                         :color="selectedEvent.color"
+                         :disabled="selectedEvent.reserved == selectedEvent.seats"
+                         class="white-font"
+                         @click="openSignUpModal"
                   >
                     Zapisz
+                  </v-btn>
+                  <v-btn v-if="admin"
+                         :color="selectedEvent.color"
+                         class="white-font"
+                         @click="()=>editClass(selectedEvent)"
+                  >
+                    Edytuj
                   </v-btn>
                 </v-card-actions>
               </v-card>
@@ -207,18 +172,152 @@
         </v-col>
       </v-row>
     </v-main>
+    <v-dialog v-model="sign_up_dialog" max-width="600px">
+      <v-card>
+        <form @submit.prevent="submit_sign_up">
+          <v-card-title>
+            <span class="headline">Zapisz się</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                      v-model="firstName"
+                      label="Imię"
+                      name="firstName"
+                      required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                      v-model="surname"
+                      label="Nazwisko"
+                      name="surname"
+                      required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                      v-model="phone"
+                      label="Telefon"
+                      name="phone"
+                      required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-select
+                      :items="['0-2', '2-4', '4-6']"
+                      label="Wiek dziecka"
+                      required
+                  ></v-select>
+                </v-col>
+              </v-row>
+              <v-checkbox :color="selectedEvent.color"
+                          label="Akceptuje RODO" required></v-checkbox>
+            </v-container>
+            <small>Wszystkie pola są wymagane</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+                :color="selectedEvent.color"
+                text
+                @click="sign_up_dialog = false"
+            >
+              Anuluj
+            </v-btn>
+            <v-btn :color="selectedEvent.color" dark type="submit">
+              Potwierdź
+            </v-btn>
+          </v-card-actions>
+        </form>
+      </v-card>
+    </v-dialog>
+    <v-dialog v-model="add_dialog" max-width="700px">
+      <v-card>
+        <form @submit.prevent="submit_add">
+          <v-card-title>
+            <span class="headline">{{ selectedEvent ? 'Edytuj' : 'Dodaj' }}</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12" md="4" sm="6">
+                  <v-text-field v-model="name" label="Nazwa" required>
+                    >
+                  </v-text-field>
+                </v-col>
+                <v-col cols="12" md="4" sm="6">
+                  <v-text-field v-model="teacher" label="Prowadzący" required>
+                    >
+                  </v-text-field>
+                </v-col>
+
+                <v-col cols="12" md="2" sm="6">
+                  <v-select
+                      v-model="color"
+                      :class="colors"
+                      :items="colors"
+                      label="Kolor"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12" md="2" sm="6">
+                  <v-select
+                      v-model="seats"
+                      :items="['1', '2', '3','4','5','6','7','8','9','10']"
+                      label="Miejsc"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                      v-model="details"
+                      label="opis"
+                      required
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                      v-model="start"
+                      label="start 2021-02-15 10:00"
+                      required
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                      v-model="end"
+                      label="koniec 2021-02-15 11:00"
+                      required
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="add_dialog = false"> Anuluj</v-btn>
+            <v-btn type="submit"> Zapisz</v-btn>
+          </v-card-actions>
+        </form>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
 <script>
-import { db } from '@/main.js';
+import { auth, db } from '@/main.js';
 
 export default {
   name: 'App',
 
   data: () => ({
+    teacher: null,
+    colors: ['#C87072', '#E79C00', '#6D2128'],
+    currentEvent: null,
+    admin: null,
     focus: '',
-    type: 'day',
+    type: 'week',
     typeToLabel: {
       month: 'Miesiąc',
       week: 'Tydzień',
@@ -239,18 +338,48 @@ export default {
     selectedElement: null,
     selectedOpen: false,
     events: [],
-    dialog: false,
+    sign_up_dialog: false,
+    add_dialog: false,
     alert: null,
     isMobile: true,
   }),
 
   mounted() {
+    auth.onAuthStateChanged((user) => (this.admin = user));
     this.getEvents();
     this.onResize();
   },
 
   methods: {
-    async submit() {
+    editClass(event) {
+      this.currentEvent = event;
+      this.selectedOpen = false;
+      this.add_dialog = true;
+
+    },
+    logout() {
+      auth.signOut();
+    },
+    async submit_add() {
+      const item = {
+        name: this.name,
+        color: this.color,
+        start: this.start,
+        end: this.end,
+        details: this.details,
+        seats: this.seats,
+        reserved: 0,
+        users: [],
+      };
+
+
+      await db.collection('schedule')
+          .doc()
+          .set(item);
+      this.add_dialog = false;
+    },
+
+    async submit_sign_up() {
       const user =
           this.firstName +
           ' ' +
@@ -266,7 +395,7 @@ export default {
           });
 
       this.getEvents();
-      this.dialog = false;
+      this.sign_up_dialog = false;
       this.alert = 'Gratulacje! Widzimy się na zajęciach :)';
     },
 
@@ -276,11 +405,9 @@ export default {
       } else {
         this.isMobile = false;
       }
-
     },
-
-    openModal() {
-      this.dialog = true;
+    openSignUpModal() {
+      this.sign_up_dialog = true;
       this.selectedOpen = false;
     },
     async getEvents() {

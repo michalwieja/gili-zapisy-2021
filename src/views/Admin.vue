@@ -2,7 +2,7 @@
   <div class="admin">
     <template>
       <v-row justify="center">
-        <v-dialog v-model="dialog" max-width="600px">
+        <v-dialog v-model="add_dialog" max-width="700px">
           <v-card>
             <form @submit.prevent="submit">
               <v-card-title>
@@ -12,45 +12,51 @@
                 <v-container>
                   <v-row>
                     <v-col cols="12" md="4" sm="6">
-                      <v-text-field label="Nazwa" required v-model="name">
+                      <v-text-field v-model="name" label="Nazwa" required>
+                        >
+                      </v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field v-model="teacher" label="Prowadzący" required>
                         >
                       </v-text-field>
                     </v-col>
 
-                    <v-col cols="12" md="4" sm="6">
+                    <v-col cols="12" md="2" sm="6">
                       <v-select
-                        :items="colors"
-                        label="Kolor"
-                        v-model="color"
+                          v-model="color"
+                          :class="colors"
+                          :items="colors"
+                          label="Kolor"
                       ></v-select>
                     </v-col>
-                    <v-col cols="12" md="4" sm="6">
+                    <v-col cols="12" md="2" sm="6">
                       <v-select
-                        :items="['5', '10', '15']"
-                        label="Liczba miejsc"
-                        v-model="seats"
+                          v-model="seats"
+                          :items="['1', '2', '3','4','5','6','7','8','9','10']"
+                          label="Miejsc"
                       ></v-select>
                     </v-col>
                     <v-col cols="12">
                       <v-text-field
-                        label="opis"
-                        required
-                        v-model="details"
+                          v-model="details"
+                          label="opis"
+                          required
                       ></v-text-field>
                     </v-col>
 
                     <v-col cols="12" sm="6">
                       <v-text-field
-                        label="start 2021-02-15 10:00"
-                        required
-                        v-model="start"
+                          v-model="start"
+                          label="start 2021-02-15 10:00"
+                          required
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6">
                       <v-text-field
-                        label="koniec 2021-02-15 11:00"
-                        required
-                        v-model="end"
+                          v-model="end"
+                          label="koniec 2021-02-15 11:00"
+                          required
                       ></v-text-field>
                     </v-col>
                   </v-row>
@@ -58,15 +64,15 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn text @click="dialog = false"> Anuluj </v-btn>
-                <v-btn type="submit"> Zapisz </v-btn>
+                <v-btn text @click="dialog = false"> Anuluj</v-btn>
+                <v-btn type="submit"> Zapisz</v-btn>
               </v-card-actions>
             </form>
           </v-card>
         </v-dialog>
       </v-row>
       <v-app>
-        <v-app-bar app dark :height="isMobile ? '80':'150'">
+        <v-app-bar :height="isMobile ? '80':'150'" app dark>
           <div class="d-flex align-center">
             <RouterLink to="/"
             ><img :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
@@ -76,7 +82,7 @@
 
           <div v-if="user">
             <v-avatar class="mr-4" color="#C87072" size="56"
-              >{{ user.email === "edytastaszowska@gmail.com" ? "ES" : "NM" }}
+            >{{ user.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
             </v-avatar>
             <v-btn @click="dialog = true">Dodaj</v-btn>
             <v-btn @click="logout">Wyloguj</v-btn>
@@ -88,17 +94,17 @@
               <v-row>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="email"
-                    label="E-mail"
-                    required
+                      v-model="email"
+                      label="E-mail"
+                      required
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-text-field
-                    v-model="password"
-                    label="password"
-                    required
-                    type="password"
+                      v-model="password"
+                      label="password"
+                      required
+                      type="password"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -112,21 +118,21 @@
           </v-form>
           <v-row v-if="user">
             <v-col
-              v-for="item in schedule"
-              :key="item.name"
-              cols="12"
-              sm="6"
-              md="4"
-              lg="3"
+                v-for="item in schedule"
+                :key="item.name"
+                cols="12"
+                lg="3"
+                md="4"
+                sm="6"
             >
               <v-card shaped>
                 <v-card-title> {{ item.name }}</v-card-title>
                 <v-card-text>{{ item.start }}</v-card-text>
                 <v-divider class="mx-4"></v-divider>
                 <v-card-text
-                  v-for="user in item.users"
-                  :key="user.name"
-                  v-html="user"
+                    v-for="user in item.users"
+                    :key="user.name"
+                    v-html="user"
                 ></v-card-text>
               </v-card>
             </v-col>
@@ -139,45 +145,46 @@
 
 
 <script>
-import { db } from "@/main.js";
-import { auth } from "@/main.js";
+import { db } from '@/main.js';
+import { auth } from '@/main.js';
 
 export default {
-  name: "Admin",
+  name: 'Admin',
   data() {
     return {
-      colors: ["#C87072", "#E79C00", "#6D2128"],
+      colors: ['#C87072', '#E79C00', '#6D2128'],
       dialog: false,
-      password: "",
-      email: "",
+      password: '',
+      email: '',
       error: null,
       user: null,
       schedule: [],
-      name: "",
-      color: "",
-      seats: "",
-      details: "",
-      start: "",
-      end: "",
+      name: '',
+      color: '',
+      seats: '',
+      details: '',
+      start: '',
+      end: '',
     };
   },
   mounted() {
     auth.onAuthStateChanged((user) => (this.user = user));
 
-    db.collection("schedule")
-      .get()
-      .then((snapshot) => {
-        snapshot.docs.forEach((doc) => this.schedule.push(doc.data()));
-      });
+    db.collection('schedule')
+        .get()
+        .then((snapshot) => {
+          snapshot.docs.forEach((doc) => this.schedule.push(doc.data()));
+        });
+    console.warn(this.schedule);
   },
   methods: {
     login() {
       this.error = null;
       auth
-        .signInWithEmailAndPassword(this.email, this.password)
-        .catch((error) => {
-          this.error = error;
-        });
+          .signInWithEmailAndPassword(this.email, this.password)
+          .catch((error) => {
+            this.error = error;
+          });
     },
     logout() {
       auth.signOut();
@@ -196,7 +203,9 @@ export default {
 
       console.log(item);
 
-      await db.collection("schedule").doc().set(item);
+      await db.collection('schedule')
+          .doc()
+          .set(item);
       this.dialog = false;
     },
   },
