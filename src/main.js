@@ -3,11 +3,14 @@ import App from './App.vue'
 import router from './router'
 import vuetify from './plugins/vuetify';
 import firebase from "firebase/app";
+import Datetime from 'vue-datetime'
+import 'vue-datetime/dist/vue-datetime.css'
+
 import "firebase/firestore";
 import "firebase/auth";
 
-
 Vue.config.productionTip = false
+Vue.use(Datetime)
 
 var firebaseConfig = {
   apiKey: "AIzaSyDvPGp8A1gZkySiHdK3D113YCBMkQlwTPY",

@@ -7,15 +7,15 @@
         /></RouterLink>
       </div>
       <v-toolbar-title v-if="!isMobile">Zapisy na zajęcia</v-toolbar-title>
-
       <v-spacer></v-spacer>
+
       <div v-if="admin">
         <v-avatar class="mr-4" color="#C87072" size="56"
         >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
         </v-avatar>
         <v-btn-toggle>
 
-          <v-btn @click="add_dialog = true">Dodaj</v-btn>
+          <v-btn @click="()=>{add_dialog = true; selectedEvent={}}">Dodaj</v-btn>
           <v-btn @click="logout">Wyloguj</v-btn>
         </v-btn-toggle>
       </div>
@@ -43,9 +43,12 @@
         </a>
       </v-row>
     </v-app-bar>
+
+    <!--    <Appbar :selectedEvent="selectedEvent" :isMobile="isMobile" :admin="admin" :logout="logout"/>-->
     <v-main>
       <v-row class="fill-height">
         <v-col>
+          <!--          calendar menu-->
           <v-sheet height="64">
             <v-toolbar flat>
               <v-btn
@@ -96,6 +99,8 @@
               </v-menu>
             </v-toolbar>
           </v-sheet>
+          <!--          end calendar menu-->
+          <!--          calendar-->
           <v-sheet height="600">
             <v-alert v-if="alert" dense text type="success">
               {{ alert }}
@@ -131,6 +136,7 @@
                 </v-toolbar>
                 <v-card-text v-if="!admin">
                   <div v-html="selectedEvent.details"></div>
+                  <div v-html="selectedEvent.teacher"></div>
                   <div>
                     Liczba miejsc:
                     <span v-html="selectedEvent.reserved"></span> /
@@ -147,7 +153,8 @@
 
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="secondary" text @click="selectedOpen = false">
+                  <v-btn color="secondary" text
+                         @click="()=> {selectedOpen = false; selectedEvent = null}">
                     Anuluj
                   </v-btn>
                   <v-btn v-if="!admin"
@@ -169,9 +176,11 @@
               </v-card>
             </v-menu>
           </v-sheet>
+          <!--          end calendar-->
         </v-col>
       </v-row>
     </v-main>
+    <!--    dialogs-->
     <v-dialog v-model="sign_up_dialog" max-width="600px">
       <v-card>
         <form @submit.prevent="submit_sign_up">
@@ -238,7 +247,9 @@
       <v-card>
         <form @submit.prevent="submit_add">
           <v-card-title>
-            <span class="headline">{{ selectedEvent ? 'Edytuj' : 'Dodaj' }}</span>
+            <span class="headline">{{
+                Object.keys(selectedEvent).length === 0 ? 'Dodaj' : 'Edytuj'
+              }}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -257,15 +268,15 @@
                 <v-col cols="12" md="2" sm="6">
                   <v-select
                       v-model="color"
-                      :class="colors"
                       :items="colors"
                       label="Kolor"
-                  ></v-select>
+                  >
+                  </v-select>
                 </v-col>
                 <v-col cols="12" md="2" sm="6">
                   <v-select
                       v-model="seats"
-                      :items="['1', '2', '3','4','5','6','7','8','9','10']"
+                      :items="['3','4','5','6','7','8','9','10']"
                       label="Miejsc"
                   ></v-select>
                 </v-col>
@@ -278,18 +289,17 @@
                 </v-col>
 
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                      v-model="start"
-                      label="start 2021-02-15 10:00"
-                      required
-                  ></v-text-field>
+                  <datetime v-model="start" :minute-step="15" input-format="YYYY-MM-DD HH:mm"
+                            placeholder="Start"
+                            type="datetime"
+                  ></datetime>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                      v-model="end"
-                      label="koniec 2021-02-15 11:00"
-                      required
-                  ></v-text-field>
+
+                  <datetime v-model="end" :minute-step="15" input-format="YYYY-MM-DD HH:mm"
+                            placeholder="Koniec"
+                            type="datetime"
+                  ></datetime>
                 </v-col>
               </v-row>
             </v-container>
@@ -307,13 +317,28 @@
 
 <script>
 import { auth, db } from '@/main.js';
+import { Datetime } from 'vue-datetime';
+import moment from 'moment';
+
+
+// import Appbar from '@/components/Appbar';
 
 export default {
   name: 'App',
-
+  components: { datetime: Datetime },
   data: () => ({
+    date: '2021-03',
     teacher: null,
-    colors: ['#C87072', '#E79C00', '#6D2128'],
+    colors: [{
+      text: 'pink',
+      value: '#C87072'
+    }, {
+      text: 'yellow',
+      value: '#E79C00'
+    }, {
+      text: 'red',
+      value: '#6D2128'
+    }],
     currentEvent: null,
     admin: null,
     focus: '',
@@ -324,7 +349,6 @@ export default {
       day: 'Dzień',
       '4day': '4 dni',
     },
-
     firstName: '',
     surname: '',
     phone: '',
@@ -364,14 +388,13 @@ export default {
       const item = {
         name: this.name,
         color: this.color,
-        start: this.start,
-        end: this.end,
+        start: moment(this.start).format('YYYY-MM-DD HH:mm'),
+        end: moment(this.end).format('YYYY-MM-DD HH:mm'),
         details: this.details,
         seats: this.seats,
         reserved: 0,
         users: [],
       };
-
 
       await db.collection('schedule')
           .doc()
