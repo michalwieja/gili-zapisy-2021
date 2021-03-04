@@ -8,14 +8,13 @@
       </div>
       <v-toolbar-title v-if="!isMobile">Zapisy na zajęcia</v-toolbar-title>
       <v-spacer></v-spacer>
-
       <div v-if="admin">
         <v-avatar class="mr-4" color="#C87072" size="56"
         >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
         </v-avatar>
         <v-btn-toggle>
 
-          <v-btn @click="()=>{add_dialog = true; selectedEvent={}}">Dodaj</v-btn>
+          <v-btn @click="handleAddButton">Dodaj</v-btn>
           <v-btn @click="logout">Wyloguj</v-btn>
         </v-btn-toggle>
       </div>
@@ -154,7 +153,7 @@
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="secondary" text
-                         @click="()=> {selectedOpen = false; selectedEvent = null}">
+                         @click="selectedOpen = false">
                     Anuluj
                   </v-btn>
                   <v-btn v-if="!admin"
@@ -168,9 +167,17 @@
                   <v-btn v-if="admin"
                          :color="selectedEvent.color"
                          class="white-font"
+                         disabled
                          @click="()=>editClass(selectedEvent)"
                   >
                     Edytuj
+                  </v-btn>
+                  <v-btn v-if="admin"
+                         class="white-font"
+                         color="red"
+                         @click="()=>deleteClass(selectedEvent)"
+                  >
+                    Usuń
                   </v-btn>
                 </v-card-actions>
               </v-card>
@@ -248,7 +255,7 @@
         <form @submit.prevent="submit_add">
           <v-card-title>
             <span class="headline">{{
-                Object.keys(selectedEvent).length === 0 ? 'Dodaj' : 'Edytuj'
+                name ? 'edytuj' : 'dodaj'
               }}</span>
           </v-card-title>
           <v-card-text>
@@ -291,6 +298,7 @@
                 <v-col cols="12" sm="6">
                   <datetime v-model="start" :minute-step="15" input-format="YYYY-MM-DD HH:mm"
                             placeholder="Start"
+                            required="true"
                             type="datetime"
                   ></datetime>
                 </v-col>
@@ -298,6 +306,7 @@
 
                   <datetime v-model="end" :minute-step="15" input-format="YYYY-MM-DD HH:mm"
                             placeholder="Koniec"
+                            required="true"
                             type="datetime"
                   ></datetime>
                 </v-col>
@@ -328,7 +337,6 @@ export default {
   components: { datetime: Datetime },
   data: () => ({
     date: '2021-03',
-    teacher: null,
     colors: [{
       text: 'pink',
       value: '#C87072'
@@ -339,7 +347,6 @@ export default {
       text: 'red',
       value: '#6D2128'
     }],
-    currentEvent: null,
     admin: null,
     focus: '',
     type: 'week',
@@ -357,7 +364,8 @@ export default {
     seats: 5,
     start: null,
     end: null,
-    color: '#fof',
+    teacher: null,
+    color: null,
     selectedEvent: {},
     selectedElement: null,
     selectedOpen: false,
@@ -375,10 +383,48 @@ export default {
   },
 
   methods: {
-    editClass(event) {
-      this.currentEvent = event;
+    async deleteClass(event) {
+      if (confirm('Na pewno chcesz usunąć?')) {
+        await db.collection('schedule')
+            .doc(event.id)
+            .delete();
+        this.selectedOpen = false;
+        this.getEvents();
+
+      }
+    },
+    handleAddButton() {
+      this.add_dialog = true;
+      this.name = null;
+      this.details = null;
+      this.teacher = null;
+      this.seats = 5;
+      this.start = null;
+      this.end = null;
+      this.color = null;
+    },
+
+    async editClass(event) {
       this.selectedOpen = false;
       this.add_dialog = true;
+      this.name = event.name;
+      this.details = event.details;
+      this.teacher = event.teacher;
+      this.seats = event.seats;
+      this.start = event.start;
+      this.end = event.end;
+      this.color = event.color;
+
+      await db.collection('schedule')
+          .doc(event)
+          .update({
+            name: this.name,
+            color: this.color,
+            details: this.details,
+            seats: this.seats,
+          });
+      console.warn(event);
+
 
     },
     logout() {
@@ -387,11 +433,14 @@ export default {
     async submit_add() {
       const item = {
         name: this.name,
-        color: this.color,
-        start: moment(this.start).format('YYYY-MM-DD HH:mm'),
-        end: moment(this.end).format('YYYY-MM-DD HH:mm'),
+        color: this.color || '#C87072',
+        start: moment(this.start)
+            .format('YYYY-MM-DD HH:mm'),
+        end: moment(this.end)
+            .format('YYYY-MM-DD HH:mm'),
         details: this.details,
         seats: this.seats,
+        teacher: this.teacher,
         reserved: 0,
         users: [],
       };
@@ -400,6 +449,7 @@ export default {
           .doc()
           .set(item);
       this.add_dialog = false;
+      this.getEvents();
     },
 
     async submit_sign_up() {

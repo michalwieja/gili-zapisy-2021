@@ -147,6 +147,7 @@
 <script>
 import { db } from '@/main.js';
 import { auth } from '@/main.js';
+import router from '../router'
 
 export default {
   name: 'Admin',
@@ -185,6 +186,7 @@ export default {
           .catch((error) => {
             this.error = error;
           });
+      router.push('/')
     },
     logout() {
       auth.signOut();
