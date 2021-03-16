@@ -156,29 +156,41 @@
                          @click="selectedOpen = false">
                     Anuluj
                   </v-btn>
-                  <v-btn v-if="!admin"
-                         :color="selectedEvent.color"
-                         :disabled="selectedEvent.reserved == selectedEvent.seats"
-                         class="white-font"
-                         @click="openSignUpModal"
-                  >
-                    Zapisz
-                  </v-btn>
-                  <v-btn v-if="admin"
-                         :color="selectedEvent.color"
-                         class="white-font"
-                         disabled
-                         @click="()=>editClass(selectedEvent)"
-                  >
-                    Edytuj
-                  </v-btn>
-                  <v-btn v-if="admin"
-                         class="white-font"
-                         color="red"
-                         @click="()=>deleteClass(selectedEvent)"
-                  >
-                    Usuń
-                  </v-btn>
+                  <v-btn-toggle v-if="!admin">
+                    <v-btn
+                        :color="selectedEvent.color"
+                        :disabled="selectedEvent.reserved >= selectedEvent.seats"
+                        class="white-font"
+                        @click="openSignUpModal"
+                    >
+                      Zapisz
+                    </v-btn>
+                    <v-btn
+                        v-if="selectedEvent.reserved >= selectedEvent.seats"
+                        :color="selectedEvent.color"
+                        class="white-font"
+                        @click="openSignUpModal"
+                    >
+                      Lista rezerwowa
+                    </v-btn>
+                  </v-btn-toggle>
+                  <v-btn-toggle v-if="admin">
+                    <v-btn
+                        :color="selectedEvent.color"
+                        class="white-font"
+                        disabled
+                        @click="()=>editClass(selectedEvent)"
+                    >
+                      Edytuj
+                    </v-btn>
+                    <v-btn
+                        class="white-font"
+                        color="red"
+                        @click="()=>deleteClass(selectedEvent)"
+                    >
+                      Usuń
+                    </v-btn>
+                  </v-btn-toggle>
                 </v-card-actions>
               </v-card>
             </v-menu>
@@ -386,8 +398,8 @@ export default {
     async deleteClass(event) {
       if (confirm('Na pewno chcesz usunąć?')) {
         await db.collection('schedule')
-            .doc(event.id)
-            .delete();
+        .doc(event.id)
+        .delete();
         this.selectedOpen = false;
         this.getEvents();
 
@@ -416,13 +428,13 @@ export default {
       this.color = event.color;
 
       await db.collection('schedule')
-          .doc(event)
-          .update({
-            name: this.name,
-            color: this.color,
-            details: this.details,
-            seats: this.seats,
-          });
+      .doc(event)
+      .update({
+        name: this.name,
+        color: this.color,
+        details: this.details,
+        seats: this.seats,
+      });
       console.warn(event);
 
 
@@ -435,9 +447,9 @@ export default {
         name: this.name,
         color: this.color || '#C87072',
         start: moment(this.start)
-            .format('YYYY-MM-DD HH:mm'),
+        .format('YYYY-MM-DD HH:mm'),
         end: moment(this.end)
-            .format('YYYY-MM-DD HH:mm'),
+        .format('YYYY-MM-DD HH:mm'),
         details: this.details,
         seats: this.seats,
         teacher: this.teacher,
@@ -446,8 +458,8 @@ export default {
       };
 
       await db.collection('schedule')
-          .doc()
-          .set(item);
+      .doc()
+      .set(item);
       this.add_dialog = false;
       this.getEvents();
     },
@@ -460,16 +472,19 @@ export default {
           ' ' +
           `<a href="tel:${this.phone}">${this.phone}</a>`;
       await db
-          .collection('schedule')
-          .doc(this.selectedEvent.id)
-          .update({
-            reserved: this.selectedEvent.reserved + 1,
-            users: [...this.selectedEvent.users, user],
-          });
+      .collection('schedule')
+      .doc(this.selectedEvent.id)
+      .update({
+        reserved: this.selectedEvent.reserved + 1,
+        users: [...this.selectedEvent.users, user],
+      });
 
-      this.getEvents();
       this.sign_up_dialog = false;
-      this.alert = 'Gratulacje! Widzimy się na zajęciach :)';
+      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową ${this.firstName}. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje ${this.firstName}! Widzimy się na zajęciach :)`;
+      this.firstName = '';
+      this.surname = '';
+      this.phone = '';
+      this.getEvents();
     },
 
     onResize() {
@@ -485,7 +500,7 @@ export default {
     },
     async getEvents() {
       let snapshot = await db.collection('schedule')
-          .get();
+      .get();
       let events = [];
       snapshot.forEach((doc) => {
         let eventData = doc.data();
@@ -511,9 +526,9 @@ export default {
       this.$refs.calendar.next();
     },
     showEvent({
-      nativeEvent,
-      event
-    }) {
+                nativeEvent,
+                event
+              }) {
       const open = () => {
         this.selectedEvent = event;
         this.selectedElement = nativeEvent.target;
