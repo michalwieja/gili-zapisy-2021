@@ -1,0 +1,14 @@
+export default {
+  sensoplastyka : {
+    teacher: 'Monika W',
+      price: '40zł',
+      short: 'tutaj opis zajęć',
+      long: 'tutaj dlugi opis zajęć',
+  },
+  gordonki : {
+    teacher: 'Monika Sz',
+      price: '50zł',
+      short: 'krotki opis gordon',
+      long: 'dugi opis'
+  }
+}

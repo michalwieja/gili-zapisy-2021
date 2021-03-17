@@ -6,9 +6,9 @@
         ><img :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
         /></RouterLink>
       </div>
-      <v-toolbar-title v-if="!isMobile">Zapisy na zajęcia</v-toolbar-title>
+      <v-toolbar-title v-if="!isMobile">Zapisz się na zajęcia</v-toolbar-title>
       <v-spacer></v-spacer>
-      <div v-if="admin">
+      <v-row v-if="admin">
         <v-avatar class="mr-4" color="#C87072" size="56"
         >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
         </v-avatar>
@@ -17,7 +17,7 @@
           <v-btn @click="handleAddButton">Dodaj</v-btn>
           <v-btn @click="logout">Wyloguj</v-btn>
         </v-btn-toggle>
-      </div>
+      </v-row>
       <v-row v-if="!admin" justify="space-around">
         <a a href="https://www.giligili.pl" target="_blank"
         >
@@ -43,7 +43,6 @@
       </v-row>
     </v-app-bar>
 
-    <!--    <Appbar :selectedEvent="selectedEvent" :isMobile="isMobile" :admin="admin" :logout="logout"/>-->
     <v-main>
       <v-row class="fill-height">
         <v-col>
@@ -125,7 +124,7 @@
                 :close-on-content-click="false"
                 offset-x
             >
-              <v-card color="grey lighten-4" flat min-width="280px">
+              <v-card v-if="selectedEvent.name" color="grey lighten-4" flat min-width="280px">
                 <v-toolbar :color="selectedEvent.color" dark>
                   <v-toolbar-title
 
@@ -134,8 +133,9 @@
                   <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text v-if="!admin">
-                  <div v-html="selectedEvent.details"></div>
-                  <div v-html="selectedEvent.teacher"></div>
+                  <div>{{selectedEventName}}</div>
+{{getShortDesc}}
+
                   <div>
                     Liczba miejsc:
                     <span v-html="selectedEvent.reserved"></span> /
@@ -211,7 +211,7 @@
               <v-row>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                      v-model="firstName"
+                      v-model="client.firstName"
                       label="Imię"
                       name="firstName"
                       required
@@ -219,7 +219,7 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                      v-model="surname"
+                      v-model="client.surname"
                       label="Nazwisko"
                       name="surname"
                       required
@@ -227,7 +227,7 @@
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                      v-model="phone"
+                      v-model="client.phone"
                       label="Telefon"
                       name="phone"
                       required
@@ -339,26 +339,21 @@
 <script>
 import { auth, db } from '@/main.js';
 import { Datetime } from 'vue-datetime';
+import colors from '../config/colors.js'
+import classes from '../config/classes.js'
 import moment from 'moment';
 
-
-// import Appbar from '@/components/Appbar';
-
 export default {
+  computed:{
+    getShortDesc(){
+      return this.classes[this.selectedEvent.name].short
+    }
+  },
   name: 'App',
   components: { datetime: Datetime },
-  data: () => ({
-    date: '2021-03',
-    colors: [{
-      text: 'pink',
-      value: '#C87072'
-    }, {
-      text: 'yellow',
-      value: '#E79C00'
-    }, {
-      text: 'red',
-      value: '#6D2128'
-    }],
+    data: () => ({
+    colors,
+    classes,
     admin: null,
     focus: '',
     type: 'week',
@@ -368,9 +363,11 @@ export default {
       day: 'Dzień',
       '4day': '4 dni',
     },
-    firstName: '',
-    surname: '',
-    phone: '',
+    client: {
+      firstName: '',
+      surname: '',
+      phone: '',
+    },
     name: null,
     details: null,
     seats: 5,
@@ -378,23 +375,30 @@ export default {
     end: null,
     teacher: null,
     color: null,
-    selectedEvent: {},
+    selectedEvent: {name: 'sensoplastyka'},
     selectedElement: null,
     selectedOpen: false,
     events: [],
     sign_up_dialog: false,
     add_dialog: false,
     alert: null,
-    isMobile: true,
+    isMobile: false,
   }),
+
+  beforeMount() {
+    this.onResize();
+    this.type = this.isMobile ? 'day' : 'week'
+
+  },
 
   mounted() {
     auth.onAuthStateChanged((user) => (this.admin = user));
     this.getEvents();
-    this.onResize();
   },
 
+
   methods: {
+
     async deleteClass(event) {
       if (confirm('Na pewno chcesz usunąć?')) {
         await db.collection('schedule')
@@ -435,9 +439,6 @@ export default {
         details: this.details,
         seats: this.seats,
       });
-      console.warn(event);
-
-
     },
     logout() {
       auth.signOut();
@@ -466,11 +467,11 @@ export default {
 
     async submit_sign_up() {
       const user =
-          this.firstName +
+          this.client.firstName +
           ' ' +
-          this.surname +
+          this.client.surname +
           ' ' +
-          `<a href="tel:${this.phone}">${this.phone}</a>`;
+          `<a href="tel:${this.client.phone}">${this.client.phone}</a>`;
       await db
       .collection('schedule')
       .doc(this.selectedEvent.id)
@@ -480,19 +481,15 @@ export default {
       });
 
       this.sign_up_dialog = false;
-      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową ${this.firstName}. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje ${this.firstName}! Widzimy się na zajęciach :)`;
-      this.firstName = '';
-      this.surname = '';
-      this.phone = '';
+      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową ${this.cleint.firstName}. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje ${this.firstName}! Widzimy się na zajęciach :)`;
+      this.client.firstName = '';
+      this.client.surname = '';
+      this.client.phone = '';
       this.getEvents();
     },
 
     onResize() {
-      if (window.innerWidth < 1024) {
-        this.isMobile = true;
-      } else {
-        this.isMobile = false;
-      }
+      this.isMobile = window.innerWidth < 1024;
     },
     openSignUpModal() {
       this.sign_up_dialog = true;

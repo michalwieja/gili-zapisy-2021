@@ -5,7 +5,7 @@
       ><img :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
       /></RouterLink>
     </div>
-    <v-toolbar-title v-if="!isMobile">Zapisy na zajęcia</v-toolbar-title>
+    <v-toolbar-title>Zapisz się na zajęcia on-line</v-toolbar-title>
     <div> {{ selectedEvent.id }}
     </div>
     <v-spacer></v-spacer>
@@ -47,10 +47,10 @@
 </template>
 
 <script>
-  export default {
-    name: 'Appbar',
-    props:['selectedEvent','isMobile','admin','logout']
+export default {
+  name: 'Appbar',
+  props: ['selectedEvent', 'isMobile', 'admin', 'logout']
 
 
-  }
+}
 </script>
