@@ -2,14 +2,17 @@
   <v-app>
     <v-app-bar :color="selectedEvent.color" :height="isMobile ? '80':'150'" app dark>
       <div class="d-flex align-center mr-10">
-        <RouterLink to="/"
-        ><img :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
+        <RouterLink
+          to="/"
+        ><img
+          :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
         /></RouterLink>
       </div>
       <v-toolbar-title v-if="!isMobile">Zapisz się na zajęcia</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-row v-if="admin">
-        <v-avatar class="mr-4" color="#C87072" size="56"
+        <v-avatar
+          class="mr-4" color="#C87072" size="56"
         >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
         </v-avatar>
         <v-btn-toggle>
@@ -18,18 +21,21 @@
           <v-btn @click="logout">Wyloguj</v-btn>
         </v-btn-toggle>
       </v-row>
-      <v-row v-if="!admin" justify="space-around">
-        <a a href="https://www.giligili.pl" target="_blank"
+      <v-row justify="space-around" v-if="!admin">
+        <a
+          href="https://www.giligili.pl" target="_blank"
         >
           <v-icon large> mdi-application</v-icon>
         </a
         >
-        <a href="https://www.facebook.com/giligilibawialnia/" target="_blank"
+        <a
+          href="https://www.facebook.com/giligilibawialnia/" target="_blank"
         >
           <v-icon large> mdi-facebook</v-icon>
         </a
         >
-        <a href="https://www.instagram.com/giligili_bawialnia/" target="_blank"
+        <a
+          href="https://www.instagram.com/giligili_bawialnia/" target="_blank"
         >
           <v-icon large> mdi-instagram</v-icon>
         </a
@@ -49,18 +55,18 @@
           <v-sheet height="64">
             <v-toolbar flat>
               <v-btn
-                  v-if="!isMobile"
-                  class="mr-4"
-                  color="grey darken-2"
-                  outlined
-                  @click="type = 'week'"
+                @click="type = 'week'"
+                class="mr-4"
+                color="grey darken-2"
+                outlined
+                v-if="!isMobile"
               >
                 Obecny tydzień
               </v-btn>
-              <v-btn color="grey darken-2" fab small text @click="prev">
+              <v-btn @click="prev" color="grey darken-2" fab small text>
                 <v-icon small> mdi-chevron-left</v-icon>
               </v-btn>
-              <v-btn color="grey darken-2" fab small text @click="next">
+              <v-btn @click="next" color="grey darken-2" fab small text>
                 <v-icon small> mdi-chevron-right</v-icon>
               </v-btn>
               <v-toolbar-title v-if="$refs.calendar">
@@ -70,10 +76,10 @@
               <v-menu bottom right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                      v-bind="attrs"
-                      v-on="on"
-                      color="grey darken-2"
-                      outlined
+                    color="grey darken-2"
+                    outlined
+                    v-bind="attrs"
+                    v-on="on"
                   >
                     <span>{{ typeToLabel[type] }}</span>
                     <v-icon right> mdi-menu-down</v-icon>
@@ -99,31 +105,31 @@
           <!--          end calendar menu-->
           <!--          calendar-->
           <v-sheet height="600">
-            <v-alert v-if="alert" dense text type="success">
+            <v-alert dense text type="success" v-if="alert">
               {{ alert }}
             </v-alert>
             <v-calendar
-                ref="calendar"
-                v-model="focus"
-                :event-color="getEventColor"
-                :events="events"
-                :first-interval="9"
-                :interval-count="10"
-                :type="type"
-                color="#ddd"
-                locale="pl"
-                @click:event="showEvent"
-                @click:more="viewDay"
-                @click:date="viewDay"
+              :event-color="getEventColor"
+              :events="events"
+              :first-interval="9"
+              :interval-count="10"
+              :type="type"
+              @click:date="viewDay"
+              @click:event="showEvent"
+              @click:more="viewDay"
+              color="#ddd"
+              locale="pl"
+              ref="calendar"
+              v-model="focus"
             ></v-calendar>
 
             <v-menu
-                v-model="selectedOpen"
-                :activator="selectedElement"
-                :close-on-content-click="false"
-                offset-x
+              :activator="selectedElement"
+              :close-on-content-click="false"
+              offset-x
+              v-model="selectedOpen"
             >
-              <v-card v-if="selectedEvent.name" color="grey lighten-4" flat min-width="280px">
+              <v-card color="grey lighten-4" flat min-width="280px" v-if="selectedEvent.name">
                 <v-toolbar :color="selectedEvent.color" dark>
                   <v-toolbar-title
                   >{{ selectedEvent.name }} | {{ selectedEvent.start }}
@@ -143,48 +149,50 @@
                 </v-card-text>
                 <v-card-text v-if="admin">
                   <v-card-text
-                      v-for="user in selectedEvent.users"
-                      :key="user.name"
-                      v-html="user"
+                    :key="user.name"
+                    v-for="user in selectedEvent.users"
+                    v-html="user"
                   ></v-card-text>
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn color="secondary" text
-                         @click="selectedOpen = false">
+                  <v-btn
+                    @click="selectedOpen = false" color="secondary"
+                    text
+                  >
                     Anuluj
                   </v-btn>
                   <v-btn-toggle v-if="!admin">
                     <v-btn
-                        :color="selectedEvent.color"
-                        :disabled="selectedEvent.reserved >= selectedEvent.seats"
-                        class="white-font"
-                        @click="openSignUpModal"
+                      :color="selectedEvent.color"
+                      :disabled="selectedEvent.reserved >= selectedEvent.seats"
+                      @click="openSignUpModal"
+                      class="white-font"
                     >
                       Zapisz
                     </v-btn>
                     <v-btn
-                        v-if="selectedEvent.reserved >= selectedEvent.seats"
-                        :color="selectedEvent.color"
-                        class="white-font"
-                        @click="openSignUpModal"
+                      :color="selectedEvent.color"
+                      @click="openSignUpModal"
+                      class="white-font"
+                      v-if="selectedEvent.reserved >= selectedEvent.seats"
                     >
                       Lista rezerwowa
                     </v-btn>
                   </v-btn-toggle>
                   <v-btn-toggle v-if="admin">
                     <v-btn
-                        :color="selectedEvent.color"
-                        class="white-font"
-                        disabled
-                        @click="()=>editClass(selectedEvent)"
+                      :color="selectedEvent.color"
+                      @click="()=>editClass(selectedEvent)"
+                      class="white-font"
+                      disabled
                     >
                       Edytuj
                     </v-btn>
                     <v-btn
-                        class="white-font"
-                        color="red"
-                        @click="()=>deleteClass(selectedEvent)"
+                      @click="()=>deleteClass(selectedEvent)"
+                      class="white-font"
+                      color="red"
                     >
                       Usuń
                     </v-btn>
@@ -198,7 +206,7 @@
       </v-row>
     </v-main>
     <!--    dialogs-->
-    <v-dialog v-model="sign_up_dialog" max-width="600px">
+    <v-dialog max-width="600px" v-model="sign_up_dialog">
       <v-card>
         <form @submit.prevent="submit_sign_up">
           <v-card-title>
@@ -209,47 +217,49 @@
               <v-row>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                      v-model="client.firstName"
-                      label="Imię"
-                      name="firstName"
-                      required
+                    label="Imię"
+                    name="firstName"
+                    required
+                    v-model="client.firstName"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                      v-model="client.surname"
-                      label="Nazwisko"
-                      name="surname"
-                      required
+                    label="Nazwisko"
+                    name="surname"
+                    required
+                    v-model="client.surname"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                      v-model="client.phone"
-                      label="Telefon"
-                      name="phone"
-                      required
+                    label="Telefon"
+                    name="phone"
+                    required
+                    v-model="client.phone"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-select
-                      :items="['0-2', '2-4', '4-6']"
-                      label="Wiek dziecka"
-                      required
+                    :items="['0-2', '2-4', '4-6']"
+                    label="Wiek dziecka"
+                    required
                   ></v-select>
                 </v-col>
               </v-row>
-              <v-checkbox :color="selectedEvent.color"
-                          label="Akceptuje RODO" required></v-checkbox>
+              <v-checkbox
+                :color="selectedEvent.color"
+                label="Akceptuje RODO" required
+              ></v-checkbox>
             </v-container>
             <small>Wszystkie pola są wymagane</small>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
-                :color="selectedEvent.color"
-                text
-                @click="sign_up_dialog = false"
+              :color="selectedEvent.color"
+              @click="sign_up_dialog = false"
+              text
             >
               Anuluj
             </v-btn>
@@ -260,7 +270,7 @@
         </form>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="add_dialog" max-width="700px">
+    <v-dialog max-width="700px" v-model="add_dialog">
       <v-card>
         <form @submit.prevent="submit_add">
           <v-card-title>
@@ -271,69 +281,75 @@
           <v-card-text>
             <v-container>
               <v-row>
+                {{add_modal_selected_event}}
                 <v-col cols="12" md="2" sm="6">
-                  <v-select
-                      :items="classes"
-                      label="zajecia"
-                  >
-                  </v-select>
+                  <v-combobox
+                    :items="classes"
+                    :value="add_modal_selected_event"
+                    @input="handleSelectEvent"
+                    label="zajecia"
+                  />
                 </v-col>
                 <v-col cols="12" md="4" sm="6">
-                  <v-text-field v-model="name" label="Nazwa" required>
+                  <v-text-field label="Nazwa" required v-model="add_modal_selected_event.name">
                     >
                   </v-text-field>
                 </v-col>
                 <v-col cols="12" md="4" sm="6">
-                  <v-text-field v-model="teacher" label="Prowadzący" required>
+                  <v-text-field label="Prowadzący" required v-model="add_modal_selected_event.teacher">
                     >
                   </v-text-field>
                 </v-col>
 
                 <v-col cols="12" md="2" sm="6">
                   <v-select
-                      v-model="color"
-                      :items="colors"
-                      label="Kolor"
+                    :items="colors"
+                    label="Kolor"
+                    v-model="add_modal_selected_event.color"
                   >
                   </v-select>
                 </v-col>
                 <v-col cols="12" md="2" sm="6">
                   <v-select
-                      v-model="seats"
-                      :items="['3','4','5','6','7','8','9','10']"
-                      label="Miejsc"
+                    :items="['3','4','5','6','7','8','9','10']"
+                    label="Miejsc"
+                    v-model="add_modal_selected_event.seats"
                   ></v-select>
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                      v-model="details"
-                      label="opis"
-                      required
+                    label="opis"
+                    required
+                    v-model="add_modal_selected_event.details"
                   ></v-text-field>
                 </v-col>
 
                 <v-col cols="12" sm="6">
-                  <datetime v-model="start" :minute-step="15" input-format="YYYY-MM-DD HH:mm"
-                            placeholder="Start"
-                            required="true"
-                            type="datetime"
+                  <datetime
+                    :minute-step="15" input-format="YYYY-MM-DD HH:mm" placeholder="Start"
+                    required="true"
+                    type="datetime"
+                    v-model="add_modal_selected_event.start"
                   ></datetime>
                 </v-col>
                 <v-col cols="12" sm="6">
 
-                  <datetime v-model="end" :minute-step="15" input-format="YYYY-MM-DD HH:mm"
-                            placeholder="Koniec"
-                            required="true"
-                            type="datetime"
-                  ></datetime>
+                  <datetime
+                    :minute-step="15"
+                    input-format="YYYY-MM-DD HH:mm"
+                    placeholder="Koniec"
+                    required="true"
+                    type="datetime"
+                    v-model="add_modal_selected_event.end"
+                  />
                 </v-col>
               </v-row>
             </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn text @click="add_dialog = false"> Anuluj</v-btn>
-            <v-btn type="submit"> Zapisz</v-btn>
+            <v-btn @click="add_dialog = false" text>Anuluj</v-btn>
+            <v-btn type="submit">Zapisz</v-btn>
           </v-card-actions>
         </form>
       </v-card>
@@ -344,12 +360,21 @@
 <script>
 import { auth, db } from '@/main.js';
 import { Datetime } from 'vue-datetime';
-import colors from '../config/colors.js'
-import classes from '../config/classes.js'
+import colors from '../config/colors.js';
+import classes from '../config/classes.js';
 import moment from 'moment';
 
-export default {
+const modal_event_factory = {
+  teacher: null,
+  color: null,
+  start: null,
+  seats: 5,
+  details: null,
+  name: null,
+  end: null,
+};
 
+export default {
   name: 'App',
   components: { datetime: Datetime },
   data: () => ({
@@ -369,14 +394,10 @@ export default {
       surname: '',
       phone: '',
     },
-    name: null,
-    details: null,
-    seats: 5,
-    start: null,
-    end: null,
-    teacher: null,
-    color: null,
     selectedEvent: {},
+    add_modal_selected_event: {
+     ...modal_event_factory,
+    },
     events: [],
     selectedElement: null,
     selectedOpen: false,
@@ -388,7 +409,7 @@ export default {
 
   beforeMount() {
     this.onResize();
-    this.type = this.isMobile ? 'day' : 'week'
+    this.type = this.isMobile ? 'day' : 'week';
   },
 
   mounted() {
@@ -399,22 +420,21 @@ export default {
   methods: {
     async deleteClass(event) {
       if (confirm('Na pewno chcesz usunąć?')) {
-        await db.collection('schedule')
-        .doc(event.id)
-        .delete();
+        await db.collection('schedule').doc(event.id).delete();
         this.selectedOpen = false;
         this.getEvents();
       }
     },
+    handleSelectEvent(val) {
+      if (typeof val === 'string') {
+        this.add_modal_selected_event.name = val;
+      } else {
+        this.add_modal_selected_event = { ...val };
+      }
+    },
     handleAddButton() {
       this.add_dialog = true;
-      this.name = null;
-      this.details = null;
-      this.teacher = null;
-      this.seats = 5;
-      this.start = null;
-      this.end = null;
-      this.color = null;
+      this.add_modal_selected_event = { ...modal_event_factory };
     },
 
     async editClass(event) {
@@ -428,9 +448,7 @@ export default {
       this.end = event.end;
       this.color = event.color;
 
-      await db.collection('schedule')
-      .doc(event)
-      .update({
+      await db.collection('schedule').doc(event).update({
         name: this.name,
         color: this.color,
         details: this.details,
@@ -444,10 +462,8 @@ export default {
       const item = {
         name: this.name,
         color: this.color || '#C87072',
-        start: moment(this.start)
-        .format('YYYY-MM-DD HH:mm'),
-        end: moment(this.end)
-        .format('YYYY-MM-DD HH:mm'),
+        start: moment(this.start).format('YYYY-MM-DD HH:mm'),
+        end: moment(this.end).format('YYYY-MM-DD HH:mm'),
         details: this.details,
         seats: this.seats,
         teacher: this.teacher,
@@ -455,24 +471,19 @@ export default {
         users: [],
       };
 
-      await db.collection('schedule')
-      .doc()
-      .set(item);
+      await db.collection('schedule').doc().set(item);
       this.add_dialog = false;
       this.getEvents();
     },
 
     async submit_sign_up() {
       const user =
-          this.client.firstName +
-          ' ' +
-          this.client.surname +
-          ' ' +
-          `<a href="tel:${this.client.phone}">${this.client.phone}</a>`;
-      await db
-      .collection('schedule')
-      .doc(this.selectedEvent.id)
-      .update({
+        this.client.firstName +
+        ' ' +
+        this.client.surname +
+        ' ' +
+        `<a href="tel:${this.client.phone}">${this.client.phone}</a>`;
+      await db.collection('schedule').doc(this.selectedEvent.id).update({
         reserved: this.selectedEvent.reserved + 1,
         users: [...this.selectedEvent.users, user],
       });
@@ -493,8 +504,7 @@ export default {
       this.selectedOpen = false;
     },
     async getEvents() {
-      let snapshot = await db.collection('schedule')
-      .get();
+      let snapshot = await db.collection('schedule').get();
       let events = [];
       snapshot.forEach((doc) => {
         let eventData = doc.data();
@@ -520,9 +530,9 @@ export default {
       this.$refs.calendar.next();
     },
     showEvent({
-                nativeEvent,
-                event
-              }) {
+      nativeEvent,
+      event,
+    }) {
       const open = () => {
         this.selectedEvent = event;
         this.selectedEventName = event.name;
