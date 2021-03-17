@@ -42,7 +42,6 @@
         </a>
       </v-row>
     </v-app-bar>
-
     <v-main>
       <v-row class="fill-height">
         <v-col>
@@ -127,15 +126,15 @@
               <v-card v-if="selectedEvent.name" color="grey lighten-4" flat min-width="280px">
                 <v-toolbar :color="selectedEvent.color" dark>
                   <v-toolbar-title
-
                   >{{ selectedEvent.name }} | {{ selectedEvent.start }}
                   </v-toolbar-title>
                   <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text v-if="!admin">
-                  <div>{{selectedEventName}}</div>
-{{getShortDesc}}
+                  <div>{{ selectedEventName }}</div>
+                  <div>{{selectedEvent.name}}</div>
 
+                  {{classes.sensoplastyka.short}}
                   <div>
                     Liczba miejsc:
                     <span v-html="selectedEvent.reserved"></span> /
@@ -149,7 +148,6 @@
                       v-html="user"
                   ></v-card-text>
                 </v-card-text>
-
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn color="secondary" text
@@ -273,6 +271,13 @@
           <v-card-text>
             <v-container>
               <v-row>
+                <v-col cols="12" md="2" sm="6">
+                  <v-select
+                      :items="classes"
+                      label="zajecia"
+                  >
+                  </v-select>
+                </v-col>
                 <v-col cols="12" md="4" sm="6">
                   <v-text-field v-model="name" label="Nazwa" required>
                     >
@@ -344,14 +349,10 @@ import classes from '../config/classes.js'
 import moment from 'moment';
 
 export default {
-  computed:{
-    getShortDesc(){
-      return this.classes[this.selectedEvent.name].short
-    }
-  },
+
   name: 'App',
   components: { datetime: Datetime },
-    data: () => ({
+  data: () => ({
     colors,
     classes,
     admin: null,
@@ -375,10 +376,10 @@ export default {
     end: null,
     teacher: null,
     color: null,
-    selectedEvent: {name: 'sensoplastyka'},
+    selectedEvent: {},
+    events: [],
     selectedElement: null,
     selectedOpen: false,
-    events: [],
     sign_up_dialog: false,
     add_dialog: false,
     alert: null,
@@ -388,7 +389,6 @@ export default {
   beforeMount() {
     this.onResize();
     this.type = this.isMobile ? 'day' : 'week'
-
   },
 
   mounted() {
@@ -396,9 +396,7 @@ export default {
     this.getEvents();
   },
 
-
   methods: {
-
     async deleteClass(event) {
       if (confirm('Na pewno chcesz usunąć?')) {
         await db.collection('schedule')
@@ -406,7 +404,6 @@ export default {
         .delete();
         this.selectedOpen = false;
         this.getEvents();
-
       }
     },
     handleAddButton() {
@@ -528,6 +525,8 @@ export default {
               }) {
       const open = () => {
         this.selectedEvent = event;
+        this.selectedEventName = event.name;
+
         this.selectedElement = nativeEvent.target;
         setTimeout(() => {
           this.selectedOpen = true;
