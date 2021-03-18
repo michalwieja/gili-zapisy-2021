@@ -10,6 +10,7 @@ export default [
     short: 'tutaj opis zajęć',
     long: 'tutaj dlugi opis zajęć',
     color: colors[0],
+    seats: 8
   }, {
     value: 1,
     text: 'gordonki',
