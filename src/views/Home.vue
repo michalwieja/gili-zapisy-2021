@@ -283,7 +283,7 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="6" md="6" sm="6">
+                <v-col cols="12" md="6" sm="12">
                   <v-combobox
                       v-model="add_modal_selected_event[0]"
                       :items="classes"
@@ -292,7 +292,7 @@
                       @input="handleSelectEvent"
                   />
                 </v-col>
-                <v-col cols="6" md="6" sm="6">
+                <v-col cols="12" md="6" sm="12">
                   <v-text-field v-model="add_modal_selected_event.name" label="Nazwa" required>
 
                   </v-text-field>
@@ -311,7 +311,7 @@
 
                   </v-text-field>
                 </v-col>
-                <v-col cols="2" md="2" sm="2">
+                <v-col cols="6" md="3" sm="3">
                   <v-text-field v-model="add_modal_selected_event.time"
                                 label="Czas"
                                 required>
@@ -319,7 +319,7 @@
                   </v-text-field>
                 </v-col>
 
-                <v-col cols="3" md="2" sm="2">
+                <v-col cols="6" md="3" sm="3">
                   <v-select
                       v-model="add_modal_selected_event.color"
                       :items="colors"
@@ -327,13 +327,13 @@
                   >
                   </v-select>
                 </v-col>
-                <v-col cols="3" md="2" sm="2">
+                <v-col cols="6" md="3" sm="3">
                   <v-text-field
                       v-model="add_modal_selected_event.seats"
                       label="Miejsc"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="2" sm="6">
+                <v-col cols="6" md="3" sm="3">
                   <v-text-field
                       v-model="add_modal_selected_event.price"
                       label="Cena"
@@ -519,7 +519,7 @@ export default {
       });
 
       this.sign_up_dialog = false;
-      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową ${this.client.firstName}. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje ${this.firstName}! Widzimy się na zajęciach :)`;
+      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
       this.client.firstName = '';
       this.client.surname = '';
       this.client.phone = '';
