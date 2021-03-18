@@ -28,6 +28,11 @@
   }
 }
 
+.v-card__text{
+  max-width: 500px ;
+  text-align: left;
+}
+
 .v-event-timed {
   display: flex;
   align-items: center;

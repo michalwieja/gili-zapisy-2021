@@ -7,4 +7,10 @@ export default [{
 }, {
   text: 'red',
   value: '#6D2128'
+}, {
+  text: 'light-pink',
+  value: '#E6BEBF'
+}, {
+  text: 'light-yellow',
+  value: '#FFD378'
 }]

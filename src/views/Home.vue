@@ -15,7 +15,7 @@
             class="mr-4" color="#C87072" size="56"
         >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
         </v-avatar>
-        <v-btn-toggle>
+        <v-btn-toggle background-color="transparent">
 
           <v-btn @click="handleAddButton">Dodaj</v-btn>
           <v-btn @click="logout">Wyloguj</v-btn>
@@ -137,11 +137,18 @@
                   <v-spacer></v-spacer>
                 </v-toolbar>
                 <v-card-text v-if="!admin">
-                  <div>{{ selectedEvent.name }}</div>
+                  <h2>{{ selectedEvent.name }}</h2>
+                  <br>
+                  <div>Prowadząca: <b>{{ selectedEvent.teacher }}</b></div>
+                  <div>Dla kogo: <b>{{ selectedEvent.who }}</b></div>
+                  <div>Czas trwania: <b>{{ selectedEvent.time }}</b></div>
+                  <br>
+                  <div>opis: {{ selectedEvent.details }}</div>
+                  <br>
                   <div>
-                    Liczba miejsc:
+                    Liczba miejsc: <b>
                     <span v-html="selectedEvent.reserved"></span> /
-                    <span v-html="selectedEvent.seats"></span>
+                    <span v-html="selectedEvent.seats"></span></b>
                   </div>
                 </v-card-text>
                 <v-card-text v-if="admin">
@@ -278,11 +285,11 @@
               <v-row>
                 <v-col cols="6" md="6" sm="6">
                   <v-combobox
+                      v-model="add_modal_selected_event[0]"
                       :items="classes"
                       :value="add_modal_selected_event"
                       label="zajecia"
                       @input="handleSelectEvent"
-                      v-model="add_modal_selected_event[0]"
                   />
                 </v-col>
                 <v-col cols="6" md="6" sm="6">
@@ -290,9 +297,23 @@
 
                   </v-text-field>
                 </v-col>
-                <v-col cols="6" md="6" sm="4">
+                <v-col cols="6" md="6" sm="6">
                   <v-text-field v-model="add_modal_selected_event.teacher"
                                 label="Prowadzący"
+                                required>
+
+                  </v-text-field>
+                </v-col>
+                <v-col cols="6" md="6" sm="6">
+                  <v-text-field v-model="add_modal_selected_event.who"
+                                label="dla kogo"
+                                required>
+
+                  </v-text-field>
+                </v-col>
+                <v-col cols="2" md="2" sm="2">
+                  <v-text-field v-model="add_modal_selected_event.time"
+                                label="Czas"
                                 required>
 
                   </v-text-field>
@@ -376,6 +397,8 @@ const modal_event_factory = {
   details: null,
   name: null,
   end: null,
+  time: null,
+  who: null,
 };
 
 export default {
@@ -465,16 +488,18 @@ export default {
     async submit_add() {
       const item = {
         name: this.add_modal_selected_event.name,
-        color: '#C87072',
-        start: moment(this.start).format('YYYY-MM-DD HH:mm'),
-        end: moment(this.end).format('YYYY-MM-DD HH:mm'),
+        color: this.add_modal_selected_event.color.value,
+        start: moment(this.add_modal_selected_event.start).format('YYYY-MM-DD HH:mm'),
+        end: moment(this.add_modal_selected_event.end).format('YYYY-MM-DD HH:mm'),
         details: this.add_modal_selected_event.short,
         seats: this.add_modal_selected_event.seats,
         teacher: this.add_modal_selected_event.teacher,
+        price: this.add_modal_selected_event.price,
+        time: this.add_modal_selected_event.time,
+        who: this.add_modal_selected_event.who,
         reserved: 0,
         users: [],
       };
-      console.warn(item);
 
       await db.collection('schedule').doc().set(item);
       this.add_dialog = false;
@@ -494,7 +519,7 @@ export default {
       });
 
       this.sign_up_dialog = false;
-      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową ${this.cleint.firstName}. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje ${this.firstName}! Widzimy się na zajęciach :)`;
+      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową ${this.client.firstName}. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje ${this.firstName}! Widzimy się na zajęciach :)`;
       this.client.firstName = '';
       this.client.surname = '';
       this.client.phone = '';
@@ -518,7 +543,7 @@ export default {
       });
       this.events = events;
     },
-    handleCurrentWeekClick(){
+    handleCurrentWeekClick() {
       this.setToday()
       this.type = 'week';
     },
