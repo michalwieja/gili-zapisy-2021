@@ -25,7 +25,7 @@ export default [
     seats: 9,
     time: '30 minut',
     who: 'zajęcia dla dzieci 0-3 lat'
-  },{
+  }, {
     value: 2,
     text: 'Ekomuzyka',
     name: 'Ekomuzyka',
@@ -91,4 +91,17 @@ export default [
     time: '45 minut',
     who: 'zajęcia dla 4-5 latków'
   },
+  {
+    value: 7,
+    text: 'Ekomuzyka dla dzieci',
+    name: 'Ekomuzyka dla dzieci',
+    teacher: 'Katarzyna M',
+    price: '40zł',
+    short: 'Zajęcia prowadzone są metodą Rytmiki Dalcroze\'a, która dostosowana do wieku podopiecznych i stosowana regularnie jest zjawiskowo efektywna. Dzieci z natury chłoną muzykę, a prowadzone przez profesjonalistę zostaną ukierunkowane wg celów, które niesie muzyka. Są to zajęcia na których wykorzystywane są instrumenty muzyczne oraz rewizyty, połączone z tańcami, ćwiczeniami rytmicznymi i improwizacją.',
+    long: 'dugi opis',
+    color: colors[2],
+    seats: 9,
+    time: '45 minut',
+    who: 'zajęcia dla dzieci 3-4 lata'
+  }
 ];

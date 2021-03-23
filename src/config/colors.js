@@ -11,7 +11,7 @@ export default [{
   text: 'light-pink',
   value: '#E6BEBF'
 }, {
-  text: 'blue-yellow',
+  text: 'light-yellow',
   value: '#FFD378'
 }, {
   text: 'blue',
@@ -19,4 +19,7 @@ export default [{
 }, {
   text: 'green',
   value: '#CAE7C1'
+},{
+  text: 'red',
+  value: '#C23B22'
 }]
