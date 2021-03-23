@@ -143,6 +143,7 @@
                   <div>Prowadząca: <b>{{ selectedEvent.teacher }}</b></div>
                   <div>Dla kogo: <b>{{ selectedEvent.who }}</b></div>
                   <div>Czas trwania: <b>{{ selectedEvent.time }}</b></div>
+                  <div>Koszt: <b>{{ selectedEvent.price }}</b></div>
                   <br>
                   <div>opis: {{ selectedEvent.details }}</div>
                   <br>
