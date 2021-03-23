@@ -12,7 +12,7 @@ export default [
     color: colors[0],
     seats: 8,
     time: '45 minut',
-    who: 'zajęcia dla dzieci do 4 lat'
+    who: 'zajęcia dla dzieci do 4 lat (warunek, dziecko samodzielnie siedzące)'
   }, {
     value: 1,
     text: 'Gordonki',
@@ -22,19 +22,19 @@ export default [
     short: 'Zajęcia gordonowskie wprowadzają dziecko w świat muzyki. To zajęcia umuzykalniające, prowadzone zgodnie z Teorią Uczenia się Muzyki autorstwa prof. Edwina E. Gordona. Teoria zakłada, że każdy człowiek poznaje muzykę w ten sam sposób co mowę i język.',
     long: 'dugi opis',
     color: colors[1],
-    seats: 10,
+    seats: 9,
     time: '30 minut',
-    who: 'zajęcia dla dzieci do 3 lat'
+    who: 'zajęcia dla dzieci 0-3 lat'
   },{
     value: 2,
     text: 'Ekomuzyka',
     name: 'Ekomuzyka',
-    teacher: 'Monika Sz',
+    teacher: 'Katarzyna M',
     price: '40zł',
-    short: 'Zajęcia prowadzone są metodą Rytmiki Dalcroze\'a, która dostosowana do wieku podopiecznych i stosowana regularnie jest zjawiskowo efektywna. Dzieci z natury chłoną muzykę, a prowadzone przez profesjonalistę zostaną ukierunkowane wg celów, które niesie muzyka.',
+    short: 'Zajęcia prowadzone są metodą Rytmiki Dalcroze\'a, która dostosowana do wieku podopiecznych i stosowana regularnie jest zjawiskowo efektywna. Dzieci z natury chłoną muzykę, a prowadzone przez profesjonalistę zostaną ukierunkowane wg celów, które niesie muzyka. Są to zajęcia na których wykorzystywane są instrumenty muzyczne oraz rewizyty, połączone z tańcami, ćwiczeniami rytmicznymi i improwizacją.',
     long: 'dugi opis',
     color: colors[2],
-    seats: 10,
+    seats: 9,
     time: '45 minut',
     who: 'zajęcia dla dzieci 6-30 miesięcy'
   },
@@ -47,7 +47,7 @@ export default [
     short: 'Warsztaty, które pozwolą dzieciom poznać pomoce Montessori i drewniane zabawki, które mamy w Gili gili. Coś rozwojowego z elementami SWOBODNEJ ZABAWY',
     long: 'dugi opis',
     color: colors[3],
-    seats: 10,
+    seats: 5,
     time: '90 minut',
     who: 'zajęcia dla dzieci do 5 lat'
 
