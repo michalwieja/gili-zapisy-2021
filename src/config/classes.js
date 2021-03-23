@@ -65,4 +65,30 @@ export default [
     time: '120 minut',
     who: 'zajęcia dla 5-6 latków'
   },
+  {
+    value: 5,
+    text: 'Zajęcia Przed przedszkole',
+    name: 'Zajęcia Przed przedszkole',
+    teacher: 'Ola Sz',
+    price: '45zł',
+    short: 'Zajęcia z elementami pedagogiki Montessori, Pedagogiki Froebla i elementami walfdorskimi. Zajęcia prowadzi doświadczony pedagog.',
+    long: 'dugi opis',
+    color: colors[5],
+    seats: 7,
+    time: '75 minut',
+    who: 'Zajecia ogólnorozwojowe dla dzieci 2 - 3 lata'
+  },
+  {
+    value: 6,
+    text: 'Warsztaty z elementami Froebla',
+    name: 'Warsztaty z elementami Froebla',
+    teacher: 'Ola Sz',
+    price: '40zł',
+    short: 'Warsztaty z elementami Froebla z wykorzystaniem darów. Warsztaty na pierwszym miejscu stawiają zabawę jako główny element poznawania świata i edukacji.',
+    long: 'dugi opis',
+    color: colors[6],
+    seats: 10,
+    time: '45 minut',
+    who: 'zajęcia dla 4-5 latków'
+  },
 ];
