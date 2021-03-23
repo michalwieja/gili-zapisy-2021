@@ -118,6 +118,7 @@
                 :type="type"
                 color="#ddd"
                 locale="pl"
+                :weekdays="weekdays"
                 @click:date="viewDay"
                 @click:event="showEvent"
                 @click:more="viewDay"
@@ -405,6 +406,7 @@ export default {
   name: 'App',
   components: { datetime: Datetime },
   data: () => ({
+    weekdays:[1,2,3,4,5,6,0],
     colors,
     classes,
     admin: null,
