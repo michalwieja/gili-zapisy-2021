@@ -1,53 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar :color="selectedEvent.color" :height="isMobile ? '80':'150'" app dark>
-      <div class="d-flex align-center mr-10">
-        <RouterLink
-            to="/"
-        ><img
-            :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
-        /></RouterLink>
-      </div>
-      <v-toolbar-title v-if="!isMobile">Zapisz się na zajęcia</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-row v-if="admin">
-        <v-avatar
-            class="mr-4" color="#C87072" size="56"
-        >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
-        </v-avatar>
-        <v-btn-toggle background-color="transparent">
-
-          <v-btn @click="handleAddButton">Dodaj</v-btn>
-          <v-btn @click="logout">Wyloguj</v-btn>
-        </v-btn-toggle>
-      </v-row>
-      <v-row v-if="!admin" justify="space-around">
-        <a
-            href="https://www.giligili.pl" target="_blank"
-        >
-          <v-icon large> mdi-application</v-icon>
-        </a
-        >
-        <a
-            href="https://www.facebook.com/giligilibawialnia/" target="_blank"
-        >
-          <v-icon large> mdi-facebook</v-icon>
-        </a
-        >
-        <a
-            href="https://www.instagram.com/giligili_bawialnia/" target="_blank"
-        >
-          <v-icon large> mdi-instagram</v-icon>
-        </a
-        >
-        <a href="mailto:halo@giligili.pl">
-          <v-icon large> mdi-email</v-icon>
-        </a>
-        <a href="tel:513-922-938">
-          <v-icon large> mdi-cellphone</v-icon>
-        </a>
-      </v-row>
-    </v-app-bar>
+    <Appbar :selected-event="selectedEvent" :is-mobile="isMobile"/>
     <v-main>
       <v-row class="fill-height">
         <v-col>
@@ -216,49 +169,13 @@
       <v-card>
         <form @submit.prevent="submit_sign_up">
           <v-card-title>
-            <span class="headline">Zapisz się</span>
+            <span class="headline">{{ selectedEvent.name }}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                      v-model="client.firstName"
-                      label="Imię"
-                      name="firstName"
-                      required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                      v-model="client.surname"
-                      label="Nazwisko"
-                      name="surname"
-                      required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                      v-model="client.phone"
-                      label="Telefon"
-                      name="phone"
-                      required
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-select
-                      :items="['0-2', '2-4', '4-6']"
-                      label="Wiek dziecka"
-                      required
-                  ></v-select>
-                </v-col>
-              </v-row>
-              <v-checkbox
-                  :color="selectedEvent.color"
-                  label="Akceptuje RODO" required
-              ></v-checkbox>
+              <v-row>{{ selectedEvent.start }}</v-row>
+              <v-row>{{ selectedEvent.end }}</v-row>
             </v-container>
-            <small>Wszystkie pola są wymagane</small>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
@@ -390,6 +307,7 @@ import { Datetime } from 'vue-datetime';
 import colors from '../config/colors.js';
 import classes from '../config/classes.js';
 import moment from 'moment';
+import Appbar from '@/components/Appbar';
 
 const modal_event_factory = {
   teacher: null,
@@ -405,12 +323,13 @@ const modal_event_factory = {
 
 export default {
   name: 'App',
-  components: { datetime: Datetime },
+  components: { Appbar, datetime: Datetime },
   data: () => ({
-    weekdays:[1,2,3,4,5,6,0],
+    weekdays: [1, 2, 3, 4, 5, 6, 0],
     colors,
     classes,
     admin: null,
+    loggedUser: null,
     focus: '',
     type: 'week',
     typeToLabel: {
@@ -418,11 +337,6 @@ export default {
       week: 'Tydzień',
       day: 'Dzień',
       '4day': '4 dni',
-    },
-    client: {
-      firstName: '',
-      surname: '',
-      phone: '',
     },
     selectedEvent: {},
     add_modal_selected_event: {
@@ -443,7 +357,7 @@ export default {
   },
 
   mounted() {
-    auth.onAuthStateChanged((user) => (this.admin = user));
+    auth.onAuthStateChanged((user) => (this.loggedUser = user));
     this.getEvents();
   },
 
@@ -485,9 +399,7 @@ export default {
         seats: this.seats,
       });
     },
-    logout() {
-      auth.signOut();
-    },
+
     async submit_add() {
       const item = {
         name: this.add_modal_selected_event.name,
@@ -510,21 +422,15 @@ export default {
     },
 
     async submit_sign_up() {
-      const user =
-          this.client.firstName +
-          ' ' +
-          this.client.surname +
-          ' ' +
-          `<a href="tel:${this.client.phone}">${this.client.phone}</a>`;
       await db.collection('schedule').doc(this.selectedEvent.id).update({
         reserved: this.selectedEvent.reserved + 1,
-        users: [...this.selectedEvent.users, user],
+        usersRef: this.loggedUser.uid,
       });
 
       this.sign_up_dialog = false;
       this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
       this.client.firstName = '';
-      this.client.surname = '';
+      this.client.lastName = '';
       this.client.phone = '';
       this.getEvents();
     },

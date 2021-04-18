@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "firebase": "^8.2.9",
+    "firebase-admin": "^9.6.0",
     "luxon": "^1.26.0",
     "moments": "0.0.2",
     "vue": "^2.6.11",
