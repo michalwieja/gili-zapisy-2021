@@ -1,53 +1,7 @@
 <template>
   <v-app>
-    <v-app-bar :color="selectedEvent.color" :height="isMobile ? '80':'150'" app dark>
-      <div class="d-flex align-center mr-10">
-        <RouterLink
-          to="/"
-        ><img
-          :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"
-        /></RouterLink>
-      </div>
-      <v-toolbar-title v-if="!isMobile">Zapisz się na zajęcia</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-row v-if="admin">
-        <v-avatar
-          class="mr-4" color="#C87072" size="56"
-        >{{ admin.email === 'edytastaszowska@gmail.com' ? 'ES' : 'NM' }}
-        </v-avatar>
-        <v-btn-toggle>
-
-          <v-btn @click="handleAddButton">Dodaj</v-btn>
-          <v-btn @click="logout">Wyloguj</v-btn>
-        </v-btn-toggle>
-      </v-row>
-      <v-row justify="space-around" v-if="!admin">
-        <a
-          href="https://www.giligili.pl" target="_blank"
-        >
-          <v-icon large> mdi-application</v-icon>
-        </a
-        >
-        <a
-          href="https://www.facebook.com/giligilibawialnia/" target="_blank"
-        >
-          <v-icon large> mdi-facebook</v-icon>
-        </a
-        >
-        <a
-          href="https://www.instagram.com/giligili_bawialnia/" target="_blank"
-        >
-          <v-icon large> mdi-instagram</v-icon>
-        </a
-        >
-        <a href="mailto:halo@giligili.pl">
-          <v-icon large> mdi-email</v-icon>
-        </a>
-        <a href="tel:513-922-938">
-          <v-icon large> mdi-cellphone</v-icon>
-        </a>
-      </v-row>
-    </v-app-bar>
+    <Appbar :selected-event="selectedEvent" :is-mobile="isMobile"
+            :classes="classes" :colors="colors"/>
     <v-main>
       <v-row class="fill-height">
         <v-col>
@@ -55,18 +9,18 @@
           <v-sheet height="64">
             <v-toolbar flat>
               <v-btn
-                @click="type = 'week'"
-                class="mr-4"
-                color="grey darken-2"
-                outlined
-                v-if="!isMobile"
+                  v-if="!isMobile"
+                  class="mr-4"
+                  color="grey darken-2"
+                  outlined
+                  @click="handleCurrentWeekClick"
               >
                 Obecny tydzień
               </v-btn>
-              <v-btn @click="prev" color="grey darken-2" fab small text>
+              <v-btn color="grey darken-2" fab small text @click="prev">
                 <v-icon small> mdi-chevron-left</v-icon>
               </v-btn>
-              <v-btn @click="next" color="grey darken-2" fab small text>
+              <v-btn color="grey darken-2" fab small text @click="next">
                 <v-icon small> mdi-chevron-right</v-icon>
               </v-btn>
               <v-toolbar-title v-if="$refs.calendar">
@@ -76,10 +30,10 @@
               <v-menu bottom right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                    color="grey darken-2"
-                    outlined
-                    v-bind="attrs"
-                    v-on="on"
+                      v-bind="attrs"
+                      v-on="on"
+                      color="grey darken-2"
+                      outlined
                   >
                     <span>{{ typeToLabel[type] }}</span>
                     <v-icon right> mdi-menu-down</v-icon>
@@ -105,94 +59,117 @@
           <!--          end calendar menu-->
           <!--          calendar-->
           <v-sheet height="600">
-            <v-alert dense text type="success" v-if="alert">
+            <v-alert v-if="alert" dense text type="success">
               {{ alert }}
             </v-alert>
             <v-calendar
-              :event-color="getEventColor"
-              :events="events"
-              :first-interval="9"
-              :interval-count="10"
-              :type="type"
-              @click:date="viewDay"
-              @click:event="showEvent"
-              @click:more="viewDay"
-              color="#ddd"
-              locale="pl"
-              ref="calendar"
-              v-model="focus"
+                ref="calendar"
+                v-model="focus"
+                :event-color="getEventColor"
+                :events="events"
+                :first-interval="9"
+                :interval-count="10"
+                :type="type"
+                color="#ddd"
+                locale="pl"
+                :weekdays="weekdays"
+                @click:date="viewDay"
+                @click:event="showEvent"
+                @click:more="viewDay"
             ></v-calendar>
 
             <v-menu
-              :activator="selectedElement"
-              :close-on-content-click="false"
-              offset-x
-              v-model="selectedOpen"
+                v-model="selectedOpen"
+                :activator="selectedElement"
+                :close-on-content-click="false"
+                offset-x
             >
-              <v-card color="grey lighten-4" flat min-width="280px" v-if="selectedEvent.name">
+              <v-card v-if="selectedEvent.name" color="grey lighten-4" flat min-width="280px">
                 <v-toolbar :color="selectedEvent.color" dark>
                   <v-toolbar-title
                   >{{ selectedEvent.name }} | {{ selectedEvent.start }}
                   </v-toolbar-title>
-                  <v-spacer></v-spacer>
                 </v-toolbar>
-                <v-card-text v-if="!admin">
-                  <div>{{ selectedEventName }}</div>
-                  <div>{{selectedEvent.name}}</div>
-
-                  {{classes.sensoplastyka.short}}
+                <v-card-text v-if="logged_user.isAdmin">
+                  <v-card-text
+                      v-for="user in selectedEvent.usersRef"
+                      :key="user"
+                  >
+                    <User :id="user" :users="users"/>
+                  </v-card-text>
+                </v-card-text>
+                <v-card-text v-else-if="!logged_user.isAdmin">
+                  <h2>{{ selectedEvent.name }}</h2>
+                  <br>
+                  <div>Prowadząca: <b>{{ selectedEvent.teacher }}</b></div>
+                  <div>Dla kogo: <b>{{ selectedEvent.who }}</b></div>
+                  <div>Czas trwania: <b>{{ selectedEvent.time }}</b></div>
+                  <div>Koszt: <b>{{ selectedEvent.price }}</b></div>
+                  <br>
+                  <div>opis: {{ selectedEvent.details }}</div>
+                  <br>
                   <div>
-                    Liczba miejsc:
+                    Liczba miejsc: <b>
                     <span v-html="selectedEvent.reserved"></span> /
-                    <span v-html="selectedEvent.seats"></span>
+                    <span v-html="selectedEvent.seats"></span></b>
                   </div>
                 </v-card-text>
-                <v-card-text v-if="admin">
-                  <v-card-text
-                    :key="user.name"
-                    v-for="user in selectedEvent.users"
-                    v-html="user"
-                  ></v-card-text>
+                <v-card-text v-else>
+                  <h2>{{ selectedEvent.name }}</h2>
+                  <br>
+                  <div>Prowadząca: <b>{{ selectedEvent.teacher }}</b></div>
+                  <div>Dla kogo: <b>{{ selectedEvent.who }}</b></div>
+                  <div>Czas trwania: <b>{{ selectedEvent.time }}</b></div>
+                  <div>Koszt: <b>{{ selectedEvent.price }}</b></div>
+                  <br>
+                  <div>opis: {{ selectedEvent.details }}</div>
+                  <br>
+                  <div>
+                    Liczba miejsc: <b>
+                    <span>{{ selectedEvent.reserved }}</span> /
+                    <span v-html="selectedEvent.seats"></span></b>
+                  </div>
                 </v-card-text>
+
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn
-                    @click="selectedOpen = false" color="secondary"
-                    text
+                      color="secondary" text
+                      @click="selectedOpen = false"
                   >
                     Anuluj
                   </v-btn>
-                  <v-btn-toggle v-if="!admin">
+                  <v-btn-toggle v-if="!logged_user.isAdmin">
                     <v-btn
-                      :color="selectedEvent.color"
-                      :disabled="selectedEvent.reserved >= selectedEvent.seats"
-                      @click="openSignUpModal"
-                      class="white-font"
+                        :color="selectedEvent.color"
+                        :disabled="selectedEvent.reserved >= selectedEvent.seats"
+                        class="white-font"
+                        @click="openSignUpModal"
                     >
                       Zapisz
                     </v-btn>
                     <v-btn
-                      :color="selectedEvent.color"
-                      @click="openSignUpModal"
-                      class="white-font"
-                      v-if="selectedEvent.reserved >= selectedEvent.seats"
+                        v-if="selectedEvent.reserved >= selectedEvent.seats"
+                        :color="selectedEvent.color"
+                        class="white-font"
+                        @click="openSignUpModal"
                     >
                       Lista rezerwowa
                     </v-btn>
                   </v-btn-toggle>
-                  <v-btn-toggle v-if="admin">
+                  <v-btn-toggle v-else>
                     <v-btn
-                      :color="selectedEvent.color"
-                      @click="()=>editClass(selectedEvent)"
-                      class="white-font"
-                      disabled
+                        :color="selectedEvent.color"
+                        class="white-font"
+                        disabled
+                        @click="()=>editClass(selectedEvent)"
                     >
                       Edytuj
                     </v-btn>
                     <v-btn
-                      @click="()=>deleteClass(selectedEvent)"
-                      class="white-font"
-                      color="red"
+                        class="white-font"
+                        color="red"
+                        @click="()=>deleteClass(selectedEvent)"
                     >
                       Usuń
                     </v-btn>
@@ -206,60 +183,26 @@
       </v-row>
     </v-main>
     <!--    dialogs-->
-    <v-dialog max-width="600px" v-model="sign_up_dialog">
+    <v-dialog v-model="sign_up_dialog" max-width="600px">
       <v-card>
         <form @submit.prevent="submit_sign_up">
           <v-card-title>
-            <span class="headline">Zapisz się</span>
+            <span class="headline">{{ selectedEvent.name }}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    label="Imię"
-                    name="firstName"
-                    required
-                    v-model="client.firstName"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    label="Nazwisko"
-                    name="surname"
-                    required
-                    v-model="client.surname"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    label="Telefon"
-                    name="phone"
-                    required
-                    v-model="client.phone"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-select
-                    :items="['0-2', '2-4', '4-6']"
-                    label="Wiek dziecka"
-                    required
-                  ></v-select>
-                </v-col>
-              </v-row>
-              <v-checkbox
-                :color="selectedEvent.color"
-                label="Akceptuje RODO" required
-              ></v-checkbox>
+              <v-row>{{ selectedEvent.start }}</v-row>
+              <v-row>{{ selectedEvent.end }}</v-row>
+
+
             </v-container>
-            <small>Wszystkie pola są wymagane</small>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn
-              :color="selectedEvent.color"
-              @click="sign_up_dialog = false"
-              text
+                :color="selectedEvent.color"
+                text
+                @click="sign_up_dialog = false"
             >
               Anuluj
             </v-btn>
@@ -270,117 +213,26 @@
         </form>
       </v-card>
     </v-dialog>
-    <v-dialog max-width="700px" v-model="add_dialog">
-      <v-card>
-        <form @submit.prevent="submit_add">
-          <v-card-title>
-            <span class="headline">{{
-                name ? 'edytuj' : 'dodaj'
-              }}</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-              <v-row>
-                {{add_modal_selected_event}}
-                <v-col cols="12" md="2" sm="6">
-                  <v-combobox
-                    :items="classes"
-                    :value="add_modal_selected_event"
-                    @input="handleSelectEvent"
-                    label="zajecia"
-                  />
-                </v-col>
-                <v-col cols="12" md="4" sm="6">
-                  <v-text-field label="Nazwa" required v-model="add_modal_selected_event.name">
-                    >
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="4" sm="6">
-                  <v-text-field label="Prowadzący" required v-model="add_modal_selected_event.teacher">
-                    >
-                  </v-text-field>
-                </v-col>
-
-                <v-col cols="12" md="2" sm="6">
-                  <v-select
-                    :items="colors"
-                    label="Kolor"
-                    v-model="add_modal_selected_event.color"
-                  >
-                  </v-select>
-                </v-col>
-                <v-col cols="12" md="2" sm="6">
-                  <v-select
-                    :items="['3','4','5','6','7','8','9','10']"
-                    label="Miejsc"
-                    v-model="add_modal_selected_event.seats"
-                  ></v-select>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    label="opis"
-                    required
-                    v-model="add_modal_selected_event.details"
-                  ></v-text-field>
-                </v-col>
-
-                <v-col cols="12" sm="6">
-                  <datetime
-                    :minute-step="15" input-format="YYYY-MM-DD HH:mm" placeholder="Start"
-                    required="true"
-                    type="datetime"
-                    v-model="add_modal_selected_event.start"
-                  ></datetime>
-                </v-col>
-                <v-col cols="12" sm="6">
-
-                  <datetime
-                    :minute-step="15"
-                    input-format="YYYY-MM-DD HH:mm"
-                    placeholder="Koniec"
-                    required="true"
-                    type="datetime"
-                    v-model="add_modal_selected_event.end"
-                  />
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn @click="add_dialog = false" text>Anuluj</v-btn>
-            <v-btn type="submit">Zapisz</v-btn>
-          </v-card-actions>
-        </form>
-      </v-card>
-    </v-dialog>
+    <!--    end dialogs-->
   </v-app>
 </template>
 
 <script>
 import { auth, db } from '@/main.js';
-import { Datetime } from 'vue-datetime';
 import colors from '../config/colors.js';
 import classes from '../config/classes.js';
-import moment from 'moment';
+import Appbar from '@/components/Appbar';
+import { mapGetters, mapActions } from 'vuex';
+import User from '@/components/User';
 
-const modal_event_factory = {
-  teacher: null,
-  color: null,
-  start: null,
-  seats: 5,
-  details: null,
-  name: null,
-  end: null,
-};
 
 export default {
   name: 'App',
-  components: { datetime: Datetime },
+  components: { User, Appbar },
   data: () => ({
+    weekdays: [1, 2, 3, 4, 5, 6, 0],
     colors,
     classes,
-    admin: null,
     focus: '',
     type: 'week',
     typeToLabel: {
@@ -389,23 +241,17 @@ export default {
       day: 'Dzień',
       '4day': '4 dni',
     },
-    client: {
-      firstName: '',
-      surname: '',
-      phone: '',
-    },
     selectedEvent: {},
-    add_modal_selected_event: {
-     ...modal_event_factory,
-    },
-    events: [],
     selectedElement: null,
     selectedOpen: false,
     sign_up_dialog: false,
-    add_dialog: false,
     alert: null,
     isMobile: false,
   }),
+
+  computed: {
+    ...mapGetters(['logged_user', 'events', 'users'])
+  },
 
   beforeMount() {
     this.onResize();
@@ -413,87 +259,31 @@ export default {
   },
 
   mounted() {
-    auth.onAuthStateChanged((user) => (this.admin = user));
-    this.getEvents();
+    auth.onAuthStateChanged((user) => (this.setUser(user)));
+    this.fetchEvents();
+    this.fetchUsers();
   },
 
   methods: {
+    ...mapActions(['fetchEvents', 'fetchUsers', 'setUser']),
+
     async deleteClass(event) {
       if (confirm('Na pewno chcesz usunąć?')) {
         await db.collection('schedule').doc(event.id).delete();
         this.selectedOpen = false;
-        this.getEvents();
+        this.fetchEvents();
       }
-    },
-    handleSelectEvent(val) {
-      if (typeof val === 'string') {
-        this.add_modal_selected_event.name = val;
-      } else {
-        this.add_modal_selected_event = { ...val };
-      }
-    },
-    handleAddButton() {
-      this.add_dialog = true;
-      this.add_modal_selected_event = { ...modal_event_factory };
-    },
-
-    async editClass(event) {
-      this.selectedOpen = false;
-      this.add_dialog = true;
-      this.name = event.name;
-      this.details = event.details;
-      this.teacher = event.teacher;
-      this.seats = event.seats;
-      this.start = event.start;
-      this.end = event.end;
-      this.color = event.color;
-
-      await db.collection('schedule').doc(event).update({
-        name: this.name,
-        color: this.color,
-        details: this.details,
-        seats: this.seats,
-      });
-    },
-    logout() {
-      auth.signOut();
-    },
-    async submit_add() {
-      const item = {
-        name: this.name,
-        color: this.color || '#C87072',
-        start: moment(this.start).format('YYYY-MM-DD HH:mm'),
-        end: moment(this.end).format('YYYY-MM-DD HH:mm'),
-        details: this.details,
-        seats: this.seats,
-        teacher: this.teacher,
-        reserved: 0,
-        users: [],
-      };
-
-      await db.collection('schedule').doc().set(item);
-      this.add_dialog = false;
-      this.getEvents();
     },
 
     async submit_sign_up() {
-      const user =
-        this.client.firstName +
-        ' ' +
-        this.client.surname +
-        ' ' +
-        `<a href="tel:${this.client.phone}">${this.client.phone}</a>`;
       await db.collection('schedule').doc(this.selectedEvent.id).update({
-        reserved: this.selectedEvent.reserved + 1,
-        users: [...this.selectedEvent.users, user],
+
+        usersRef: this.logged_user.uid,
       });
 
       this.sign_up_dialog = false;
-      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową ${this.cleint.firstName}. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje ${this.firstName}! Widzimy się na zajęciach :)`;
-      this.client.firstName = '';
-      this.client.surname = '';
-      this.client.phone = '';
-      this.getEvents();
+      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
+      this.fetchEvents();
     },
 
     onResize() {
@@ -503,15 +293,10 @@ export default {
       this.sign_up_dialog = true;
       this.selectedOpen = false;
     },
-    async getEvents() {
-      let snapshot = await db.collection('schedule').get();
-      let events = [];
-      snapshot.forEach((doc) => {
-        let eventData = doc.data();
-        eventData.id = doc.id;
-        events.push(eventData);
-      });
-      this.events = events;
+
+    handleCurrentWeekClick() {
+      this.setToday()
+      this.type = 'week';
     },
     getEventColor(ev) {
       return ev.color;
@@ -530,12 +315,11 @@ export default {
       this.$refs.calendar.next();
     },
     showEvent({
-      nativeEvent,
-      event,
-    }) {
+                nativeEvent,
+                event,
+              }) {
       const open = () => {
         this.selectedEvent = event;
-        this.selectedEventName = event.name;
 
         this.selectedElement = nativeEvent.target;
         setTimeout(() => {
@@ -549,7 +333,6 @@ export default {
       } else {
         open();
       }
-
       nativeEvent.stopPropagation();
     },
   },

@@ -1,10 +1,5 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link>
-      |
-      <router-link to="/admin">Admin</router-link>
-    </div>
     <router-view/>
   </div>
 </template>
@@ -26,6 +21,11 @@
   &:hover {
     transform: rotateY(360deg);
   }
+}
+
+.v-card__text{
+  max-width: 500px ;
+  text-align: left;
 }
 
 .v-event-timed {
