@@ -5,6 +5,7 @@ import vuetify from './plugins/vuetify';
 import firebase from "firebase/app";
 import Datetime from 'vue-datetime'
 import 'vue-datetime/dist/vue-datetime.css'
+import store from './store'
 
 import "firebase/firestore";
 import "firebase/auth";
@@ -27,6 +28,7 @@ export const db = firebase.firestore();
 export const auth = firebase.auth();
 
 new Vue({
+  store,
   router,
   vuetify,
   render: function (h) { return h(App) }

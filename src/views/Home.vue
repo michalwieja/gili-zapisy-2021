@@ -1,7 +1,9 @@
 <template>
   <v-app>
-    <Appbar :selected-event="selectedEvent" :is-mobile="isMobile"/>
+    <Appbar :selected-event="selectedEvent" :is-mobile="isMobile"
+            :classes="classes" :colors="colors"/>
     <v-main>
+
       <v-row class="fill-height">
         <v-col>
           <!--          calendar menu-->
@@ -88,9 +90,16 @@
                   <v-toolbar-title
                   >{{ selectedEvent.name }} | {{ selectedEvent.start }}
                   </v-toolbar-title>
-                  <v-spacer></v-spacer>
                 </v-toolbar>
-                <v-card-text v-if="!admin">
+                <v-card-text v-if="logged_user.isAdmin">
+                  <v-card-text
+                      v-for="user in selectedEvent.usersRef"
+                      :key="user"
+                  >
+                    <User :id="user" :users="users"/>
+                  </v-card-text>
+                </v-card-text>
+                <v-card-text v-else-if="!logged_user.isAdmin">
                   <h2>{{ selectedEvent.name }}</h2>
                   <br>
                   <div>Prowadząca: <b>{{ selectedEvent.teacher }}</b></div>
@@ -102,17 +111,27 @@
                   <br>
                   <div>
                     Liczba miejsc: <b>
-                    <span v-html="selectedEvent.reserved"></span> /
+                    <span v-html="selectedEvent.usersRef.length"></span> /
                     <span v-html="selectedEvent.seats"></span></b>
                   </div>
                 </v-card-text>
-                <v-card-text v-if="admin">
-                  <v-card-text
-                      v-for="user in selectedEvent.users"
-                      :key="user.name"
-                      v-html="user"
-                  ></v-card-text>
+                <v-card-text v-else>
+                  <h2>{{ selectedEvent.name }}</h2>
+                  <br>
+                  <div>Prowadząca: <b>{{ selectedEvent.teacher }}</b></div>
+                  <div>Dla kogo: <b>{{ selectedEvent.who }}</b></div>
+                  <div>Czas trwania: <b>{{ selectedEvent.time }}</b></div>
+                  <div>Koszt: <b>{{ selectedEvent.price }}</b></div>
+                  <br>
+                  <div>opis: {{ selectedEvent.details }}</div>
+                  <br>
+                  <div>
+                    Liczba miejsc: <b>
+                    <span>{{ selectedEvent.usersRef.length }}</span> /
+                    <span v-html="selectedEvent.seats"></span></b>
+                  </div>
                 </v-card-text>
+
                 <v-card-actions>
                   <v-spacer></v-spacer>
                   <v-btn
@@ -121,17 +140,17 @@
                   >
                     Anuluj
                   </v-btn>
-                  <v-btn-toggle v-if="!admin">
+                  <v-btn-toggle v-if="!logged_user.isAdmin">
                     <v-btn
                         :color="selectedEvent.color"
-                        :disabled="selectedEvent.reserved >= selectedEvent.seats"
+                        :disabled="selectedEvent.usersRef.length >= selectedEvent.seats"
                         class="white-font"
                         @click="openSignUpModal"
                     >
                       Zapisz
                     </v-btn>
                     <v-btn
-                        v-if="selectedEvent.reserved >= selectedEvent.seats"
+                        v-if="selectedEvent.usersRef.length >= selectedEvent.seats"
                         :color="selectedEvent.color"
                         class="white-font"
                         @click="openSignUpModal"
@@ -139,7 +158,7 @@
                       Lista rezerwowa
                     </v-btn>
                   </v-btn-toggle>
-                  <v-btn-toggle v-if="admin">
+                  <v-btn-toggle v-else>
                     <v-btn
                         :color="selectedEvent.color"
                         class="white-font"
@@ -175,6 +194,8 @@
             <v-container>
               <v-row>{{ selectedEvent.start }}</v-row>
               <v-row>{{ selectedEvent.end }}</v-row>
+
+
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -193,137 +214,22 @@
         </form>
       </v-card>
     </v-dialog>
-    <v-dialog v-model="add_dialog" max-width="700px">
-      <v-card>
-        <form @submit.prevent="submit_add">
-          <v-card-title>
-            <span class="headline">Dodaj</span>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-              <v-row>
-                <v-col cols="12" md="6" sm="12">
-                  <v-combobox
-                      v-model="add_modal_selected_event[0]"
-                      :items="classes"
-                      :value="add_modal_selected_event"
-                      label="zajecia"
-                      @input="handleSelectEvent"
-                  />
-                </v-col>
-                <v-col cols="12" md="6" sm="12">
-                  <v-text-field v-model="add_modal_selected_event.name" label="Nazwa" required>
-
-                  </v-text-field>
-                </v-col>
-                <v-col cols="6" md="6" sm="6">
-                  <v-text-field v-model="add_modal_selected_event.teacher"
-                                label="Prowadzący"
-                                required>
-
-                  </v-text-field>
-                </v-col>
-                <v-col cols="6" md="6" sm="6">
-                  <v-text-field v-model="add_modal_selected_event.who"
-                                label="dla kogo"
-                                required>
-
-                  </v-text-field>
-                </v-col>
-                <v-col cols="6" md="3" sm="3">
-                  <v-text-field v-model="add_modal_selected_event.time"
-                                label="Czas"
-                                required>
-
-                  </v-text-field>
-                </v-col>
-
-                <v-col cols="6" md="3" sm="3">
-                  <v-select
-                      v-model="add_modal_selected_event.color"
-                      :items="colors"
-                      label="Kolor"
-                  >
-                  </v-select>
-                </v-col>
-                <v-col cols="6" md="3" sm="3">
-                  <v-text-field
-                      v-model="add_modal_selected_event.seats"
-                      label="Miejsc"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="6" md="3" sm="3">
-                  <v-text-field
-                      v-model="add_modal_selected_event.price"
-                      label="Cena"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                      v-model="add_modal_selected_event.short"
-                      label="opis"
-                      required
-                  ></v-text-field>
-
-                </v-col>
-
-                <v-col cols="12" sm="6">
-                  <datetime
-                      v-model="add_modal_selected_event.start" :minute-step="15"
-                      input-format="YYYY-MM-DD HH:mm"
-                      placeholder="Start"
-                      required="true"
-                      type="datetime"
-                  ></datetime>
-                </v-col>
-                <v-col cols="12" sm="6">
-
-                  <datetime
-                      v-model="add_modal_selected_event.end"
-                      :minute-step="15"
-                      input-format="YYYY-MM-DD HH:mm"
-                      placeholder="Koniec"
-                      required="true"
-                      type="datetime"
-                  />
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn text @click="add_dialog = false">Anuluj</v-btn>
-            <v-btn type="submit">Zapisz</v-btn>
-          </v-card-actions>
-        </form>
-      </v-card>
-    </v-dialog>
+    <!--    end dialogs-->
   </v-app>
 </template>
 
 <script>
 import { auth, db } from '@/main.js';
-import { Datetime } from 'vue-datetime';
 import colors from '../config/colors.js';
 import classes from '../config/classes.js';
-import moment from 'moment';
 import Appbar from '@/components/Appbar';
+import { mapGetters, mapActions } from 'vuex';
+import User from '@/components/User';
 
-const modal_event_factory = {
-  teacher: null,
-  color: null,
-  start: null,
-  seats: null,
-  details: null,
-  name: null,
-  end: null,
-  time: null,
-  who: null,
-};
 
 export default {
   name: 'App',
-  components: { Appbar, datetime: Datetime },
+  components: { User, Appbar },
   data: () => ({
     weekdays: [1, 2, 3, 4, 5, 6, 0],
     colors,
@@ -339,17 +245,16 @@ export default {
       '4day': '4 dni',
     },
     selectedEvent: {},
-    add_modal_selected_event: {
-      ...modal_event_factory,
-    },
-    events: [],
     selectedElement: null,
     selectedOpen: false,
     sign_up_dialog: false,
-    add_dialog: false,
     alert: null,
     isMobile: false,
   }),
+
+  computed: {
+    ...mapGetters(['logged_user', 'events', 'users'])
+  },
 
   beforeMount() {
     this.onResize();
@@ -357,82 +262,31 @@ export default {
   },
 
   mounted() {
-    auth.onAuthStateChanged((user) => (this.loggedUser = user));
-    this.getEvents();
+    auth.onAuthStateChanged((user) => (this.setUser(user)));
+    this.fetchEvents();
+    this.fetchUsers();
   },
 
   methods: {
+    ...mapActions(['fetchEvents', 'fetchUsers', 'setUser']),
+
     async deleteClass(event) {
       if (confirm('Na pewno chcesz usunąć?')) {
         await db.collection('schedule').doc(event.id).delete();
         this.selectedOpen = false;
-        this.getEvents();
+        this.fetchEvents();
       }
-    },
-    handleSelectEvent(val) {
-      if (typeof val === 'string') {
-        this.add_modal_selected_event.name = val;
-      } else {
-        this.add_modal_selected_event = { ...val };
-      }
-    },
-    handleAddButton() {
-      this.add_dialog = true;
-      this.add_modal_selected_event = { ...modal_event_factory };
-    },
-
-    async editClass(event) {
-      this.selectedOpen = false;
-      this.add_dialog = true;
-      this.name = event.name;
-      this.details = event.details;
-      this.teacher = event.teacher;
-      this.seats = event.seats;
-      this.start = event.start;
-      this.end = event.end;
-      this.color = event.color;
-
-      await db.collection('schedule').doc(event).update({
-        name: this.name,
-        color: this.color,
-        details: this.details,
-        seats: this.seats,
-      });
-    },
-
-    async submit_add() {
-      const item = {
-        name: this.add_modal_selected_event.name,
-        color: this.add_modal_selected_event.color.value,
-        start: moment(this.add_modal_selected_event.start).format('YYYY-MM-DD HH:mm'),
-        end: moment(this.add_modal_selected_event.end).format('YYYY-MM-DD HH:mm'),
-        details: this.add_modal_selected_event.short,
-        seats: this.add_modal_selected_event.seats,
-        teacher: this.add_modal_selected_event.teacher,
-        price: this.add_modal_selected_event.price,
-        time: this.add_modal_selected_event.time,
-        who: this.add_modal_selected_event.who,
-        reserved: 0,
-        users: [],
-      };
-
-      await db.collection('schedule').doc().set(item);
-      this.add_dialog = false;
-      this.getEvents();
     },
 
     async submit_sign_up() {
       await db.collection('schedule').doc(this.selectedEvent.id).update({
-        reserved: this.selectedEvent.reserved + 1,
-        usersRef: this.loggedUser.uid,
+
+        usersRef: [ this.logged_user.uid],
       });
 
       this.sign_up_dialog = false;
-      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
-      this.client.firstName = '';
-      this.client.lastName = '';
-      this.client.phone = '';
-      this.getEvents();
+      this.alert = this.selectedEvent.usersRef.length >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
+      this.fetchEvents();
     },
 
     onResize() {
@@ -442,16 +296,7 @@ export default {
       this.sign_up_dialog = true;
       this.selectedOpen = false;
     },
-    async getEvents() {
-      let snapshot = await db.collection('schedule').get();
-      let events = [];
-      snapshot.forEach((doc) => {
-        let eventData = doc.data();
-        eventData.id = doc.id;
-        events.push(eventData);
-      });
-      this.events = events;
-    },
+
     handleCurrentWeekClick() {
       this.setToday()
       this.type = 'week';
