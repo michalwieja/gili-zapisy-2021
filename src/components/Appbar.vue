@@ -10,8 +10,9 @@
           <v-btn @click="sign_in_dialog=true; error=null">Zarejestruj się</v-btn>
         </v-btn-toggle>
       </div>
-      <div v-else>
-        <h2>{{ logged_user.email }}</h2>
+      <div v-else class="d-flex align-center ">
+        <h2 class="mr-10">Witaj, {{ logged_user.firstName }}, zapisz się na zajęcia</h2>
+
         <v-btn-toggle background-color="transparent">
           <v-btn v-if="!logged_user.isAdmin" @click="showUserEvents">Moje zajęcia</v-btn>
           <v-btn v-if="logged_user.isAdmin" @click="handleAddButton">Dodaj</v-btn>
@@ -72,9 +73,11 @@
         <v-card-title>
           <span class="headline">Moje zajęcia</span>
         </v-card-title>
+        <div v-if="user_events.length === 0" class="pb-10">Nie masz jeszcze żadnych zajęć</div>
         <UserEvent v-for="event in user_events" :key="event.id" :event="event"/>
-        <small>Jeżeli chcesz zrezygnować z zajęć poinformuj nas o tym telefonicznie <a
-            href="tel:513-922-938">513-922-938</a></small>
+        <small v-if="user_events.length" class="pb-10">Jeżeli chcesz zrezygnować z zajęć poinformuj
+          nas o tym telefonicznie <a
+              href="tel:513-922-938">513-922-938</a></small>
 
       </v-card>
     </v-dialog>
