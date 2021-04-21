@@ -6,8 +6,8 @@
       </RouterLink>
       <div v-if="!logged_user">
         <v-btn-toggle background-color="transparent">
-          <v-btn @click="log_in_dialog=true">Zaloguj się</v-btn>
-          <v-btn @click="sign_in_dialog=true">Zarejestruj się</v-btn>
+          <v-btn @click="log_in_dialog=true; error=null">Zaloguj się</v-btn>
+          <v-btn @click="sign_in_dialog=true; error=null">Zarejestruj się</v-btn>
         </v-btn-toggle>
       </div>
       <div v-else>
@@ -26,6 +26,9 @@
           <v-card-title>
             <span class="headline">Zaloguj się</span>
           </v-card-title>
+          <v-alert v-if="error" dense text type="error">
+            {{ error }}
+          </v-alert>
           <v-card-text>
             <v-container>
               <v-row>
@@ -37,7 +40,6 @@
                       required
                   ></v-text-field>
                 </v-col>
-
                 <v-col cols="12">
                   <v-text-field
                       v-model="user.password"
@@ -47,10 +49,6 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-checkbox
-                  :color="selectedEvent.color"
-                  label="Akceptuje RODO" required
-              ></v-checkbox>
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -69,13 +67,26 @@
         </form>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="user_events_dialog" max-width="600px" class="dialog user-events-dialog">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Moje zajęcia</span>
+        </v-card-title>
+        <UserEvent v-for="event in user_events" :key="event.id" :event="event"/>
+        <small>Jeżeli chcesz zrezygnować z zajęć poinformuj nas o tym telefonicznie <a
+            href="tel:513-922-938">513-922-938</a></small>
+
+      </v-card>
+    </v-dialog>
     <v-dialog v-model="sign_in_dialog" max-width="600px">
       <v-card>
         <form @submit.prevent="submit_sign_in">
           <v-card-title>
             <span class="headline">Zarejstruj się</span>
-            <div v-if="error">{{ error }}</div>
           </v-card-title>
+          <v-alert v-if="error" dense text type="error">
+            {{ error }}
+          </v-alert>
           <v-card-text>
             <v-container>
               <v-row>
@@ -119,7 +130,6 @@
                       required
                   ></v-text-field>
                 </v-col>
-
               </v-row>
               <v-checkbox
                   :color="selectedEvent.color"
@@ -249,7 +259,6 @@
         </form>
       </v-card>
     </v-dialog>
-
   </div>
 </template>
 
@@ -258,7 +267,7 @@ import { mapActions, mapGetters } from 'vuex';
 import { auth, db } from '@/main.js';
 import { Datetime } from 'vue-datetime';
 import moment from 'moment';
-
+import UserEvent from '@/components/UserEvent';
 
 const modal_event_factory = {
   teacher: null,
@@ -274,31 +283,38 @@ const modal_event_factory = {
 export default {
   name: 'Appbar',
   props: ['selectedEvent', 'isMobile', 'classes', 'colors'],
-  components: { datetime: Datetime },
+  components: { UserEvent, datetime: Datetime },
 
   data() {
     return {
       log_in_dialog: false,
       sign_in_dialog: false,
       add_dialog: false,
+      user_events_dialog: false,
       error: '',
       add_modal_selected_event: {
         ...modal_event_factory,
       },
+      user_events: [],
       user: {
         email: '',
         password: '',
         firstName: '',
         lastName: '',
         phone: '',
+      },
+      errors: {
+        'auth/invalid-email': 'Proszę podać poprawny adres email',
+        'auth/weak-password': 'Hasło musi mieć co najmniej 6 znaków',
+        'auth/email-already-in-use': 'Użytkownik już istnieje'
       }
     }
+
   },
   computed: {
-    ...mapGetters(['logged_user'])
+    ...mapGetters(['logged_user', 'events'])
   },
   mounted() {
-
     auth.onAuthStateChanged(async (user) => {
       if (!user || (user && !user.uid)) return
       const userRef = db.collection('users').doc(user.uid);
@@ -328,9 +344,10 @@ export default {
           email: this.user.email,
         })
         this.sign_in_dialog = false;
+        this.user = {};
       }
       catch (err) {
-        this.error = err
+        this.error = this.errors[err.code];
       }
     },
     // end rejestracja
@@ -342,21 +359,19 @@ export default {
         if (!res) {
           this.error = 'Nie można było zalogować';
         }
-        if (res.user.email === 'edytastaszowska@gmail.com') {
-          this.admin = res.user;
-          this.log_in_dialog = false;
-          this.$emit('admin', this.admin)
 
-        } else {
-          this.setUser(res.user)
-          this.log_in_dialog = false;
-        }
+        this.setUser(res.user)
+        this.log_in_dialog = false;
+        this.user = {};
+
+
       }
       catch (err) {
-        this.error = err
+        this.error = 'Hasło jest nieprawidłowe lub taki użytkownik nie istnieje'
+        this.user = {};
       }
     },
-    //emd logowanie
+    //end logowanie
 
     // logout
     logout() {
@@ -399,10 +414,19 @@ export default {
     },
     //end
 
-    //calendar fn
+    //modal z zapisami
     showUserEvents() {
-      console.warn('events');
+      this.user_events_dialog = true;
+      this.user_events = this.events.filter(event => {
+        if (event.usersRef) {
+          return event.usersRef.some(user_uid => {
+            return this.logged_user.uid == user_uid
+          })
+        }
+      })
     },
+    //end
+
     handleSelectEvent(val) {
       if (typeof val === 'string') {
         this.add_modal_selected_event.name = val;
@@ -410,7 +434,7 @@ export default {
         this.add_modal_selected_event = { ...val };
       }
     },
-    // end calendar fn
   }
 }
 </script>
+

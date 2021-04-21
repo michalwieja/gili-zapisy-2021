@@ -77,7 +77,6 @@
                 @click:event="showEvent"
                 @click:more="viewDay"
             ></v-calendar>
-
             <v-menu
                 v-model="selectedOpen"
                 :activator="selectedElement"
@@ -90,15 +89,21 @@
                   >{{ selectedEvent.name }} | {{ selectedEvent.start }}
                   </v-toolbar-title>
                 </v-toolbar>
-                <v-card-text v-if="logged_user.isAdmin">
+                <v-card-text v-if="logged_user && logged_user.isAdmin">
+                  <v-card-text v-if="!selectedEvent.users && !selectedEvent.usersRef">Jeszcze nikt
+                    się nie zapisał :(
+                  </v-card-text>
                   <v-card-text
                       v-for="user in selectedEvent.usersRef"
                       :key="user"
                   >
-                    <User :id="user" :users="users"/>
+                    <User :id="user" :users="users" :event="selectedEvent"/>
+                  </v-card-text>
+                  <v-divider></v-divider>
+                  <v-card-text v-for="user in selectedEvent.users" v-html="user" :key="user.id">
                   </v-card-text>
                 </v-card-text>
-                <v-card-text v-else-if="!logged_user.isAdmin">
+                <v-card-text v-else-if="logged_user && !logged_user.isAdmin">
                   <h2>{{ selectedEvent.name }}</h2>
                   <br>
                   <div>Prowadząca: <b>{{ selectedEvent.teacher }}</b></div>
@@ -130,16 +135,11 @@
                     <span v-html="selectedEvent.seats"></span></b>
                   </div>
                 </v-card-text>
-
                 <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                      color="secondary" text
-                      @click="selectedOpen = false"
-                  >
-                    Anuluj
-                  </v-btn>
-                  <v-btn-toggle v-if="!logged_user.isAdmin">
+                  <div class="text-center" v-if="!logged_user">Zaloguj się lub zarejstruj aby móc
+                    się zapisać
+                  </div>
+                  <v-btn-toggle v-if="logged_user && !logged_user.isAdmin">
                     <v-btn
                         :color="selectedEvent.color"
                         :disabled="selectedEvent.reserved >= selectedEvent.seats"
@@ -156,8 +156,14 @@
                     >
                       Lista rezerwowa
                     </v-btn>
+                    <v-btn
+                        color="secondary" text
+                        @click="selectedOpen = false"
+                    >
+                      Anuluj
+                    </v-btn>
                   </v-btn-toggle>
-                  <v-btn-toggle v-else>
+                  <v-btn-toggle v-if="logged_user && logged_user.isAdmin">
                     <v-btn
                         :color="selectedEvent.color"
                         class="white-font"
@@ -172,6 +178,12 @@
                         @click="()=>deleteClass(selectedEvent)"
                     >
                       Usuń
+                    </v-btn>
+                    <v-btn
+                        color="secondary" text
+                        @click="selectedOpen = false"
+                    >
+                      Anuluj
                     </v-btn>
                   </v-btn-toggle>
                 </v-card-actions>
@@ -193,8 +205,6 @@
             <v-container>
               <v-row>{{ selectedEvent.start }}</v-row>
               <v-row>{{ selectedEvent.end }}</v-row>
-
-
             </v-container>
           </v-card-text>
           <v-card-actions>
@@ -224,7 +234,6 @@ import classes from '../config/classes.js';
 import Appbar from '@/components/Appbar';
 import { mapGetters, mapActions } from 'vuex';
 import User from '@/components/User';
-
 
 export default {
   name: 'App',
@@ -267,23 +276,23 @@ export default {
   methods: {
     ...mapActions(['fetchEvents', 'fetchUsers', 'setUser']),
 
-    async deleteClass(event) {
-      if (confirm('Na pewno chcesz usunąć?')) {
-        await db.collection('schedule').doc(event.id).delete();
-        this.selectedOpen = false;
-        this.fetchEvents();
-      }
-    },
-
     async submit_sign_up() {
       await db.collection('schedule').doc(this.selectedEvent.id).update({
-
-        usersRef: this.logged_user.uid,
+        usersRef: [...this.selectedEvent.usersRef, this.logged_user.uid],
+        reserved: this.selectedEvent.reserved += 1
       });
 
       this.sign_up_dialog = false;
       this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
       this.fetchEvents();
+    },
+    async deleteClass(event) {
+      if (confirm('Na pewno chcesz usunąć?')) {
+        await db.collection('schedule').doc(event.id).delete();
+        this.selectedOpen = false;
+        this.fetchEvents();
+        this.fetchUsers()
+      }
     },
 
     onResize() {
