@@ -11,8 +11,8 @@
         </v-btn-toggle>
       </div>
       <div v-else class="d-flex align-center ">
-        <h2 class="mr-10">Witaj, {{ logged_user.firstName }}, zapisz się na zajęcia</h2>
-
+        <h2 class="mr-10" v-if="logged_user.isAdmin">Witaj {{ logged_user.firstName }}, jesteś prezesem</h2>
+        <h2 class="mr-10" v-if="!logged_user.isAdmin">Witaj {{ logged_user.firstName }}, zapisz się na zajęcia</h2>
         <v-btn-toggle background-color="transparent">
           <v-btn v-if="!logged_user.isAdmin" @click="showUserEvents">Moje zajęcia</v-btn>
           <v-btn v-if="logged_user.isAdmin" @click="handleAddButton">Dodaj</v-btn>
@@ -408,7 +408,7 @@ export default {
         time: this.add_modal_selected_event.time,
         who: this.add_modal_selected_event.who,
         reserved: 0,
-        users: [],
+        usersRef: [],
       };
 
       await db.collection('schedule').doc().set(item);
