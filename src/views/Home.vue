@@ -90,14 +90,14 @@
                   </v-toolbar-title>
                 </v-toolbar>
                 <v-card-text v-if="logged_user && logged_user.isAdmin">
-                  <v-card-text v-if="!selectedEvent.users && !selectedEvent.usersRef">Jeszcze nikt
+                  <v-card-text v-if="selectedEvent.usersRef.length ===0">Jeszcze nikt
                     się nie zapisał :(
                   </v-card-text>
                   <v-card-text
-                      v-for="user in selectedEvent.usersRef"
+                      v-for="(user, index) in selectedEvent.usersRef"
                       :key="user"
                   >
-                    <User :id="user" :users="users" :event="selectedEvent"/>
+                    <User :id="user" :index="index" :users="users" :event="selectedEvent"/>
                   </v-card-text>
                   <v-divider></v-divider>
                   <v-card-text v-for="user in selectedEvent.users" v-html="user" :key="user.id">

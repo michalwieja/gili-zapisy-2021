@@ -1,8 +1,8 @@
 <template>
   <div v-if="user" class="user">
-    <div class="name">
-      {{ user.firstName }}
-      {{ user.lastName }}
+    <div class="name" :class="index +1> event.seats && 'disabled'">
+      <span>{{index + 1}}</span>
+      <span>{{ user.firstName }} {{ user.lastName }}</span>
     </div>
     <div class="phone"><a href="tel:${user.phone }"> {{ user.phone }}</a></div>
     <v-btn @click="remove_user" class="white-font delete-btn"
@@ -17,21 +17,22 @@ import { mapActions } from 'vuex';
 
 export default {
   name: "User",
-  props: ['id', 'users', 'event'],
+  props: ['id', 'users', 'event','index'],
   computed: {
     user() {
       return this.users.find(user => user.uid === this.id)
     }
   },
   methods: {
-    ...mapActions(['fetchEvents']),
+    ...mapActions(['fetchEvents', 'fetchUsers']),
 
     async remove_user() {
       await db.collection('schedule').doc(this.event.id).update({
         usersRef: this.event.usersRef.filter(user => user !== this.id),
-        reserved: this.event.reserved -= 1
+
       });
-      this.fetchEvents()
+      await this.fetchEvents()
+      await this.fetchUsers()
     }
   }
 }
@@ -43,16 +44,23 @@ export default {
 
   .name {
     min-width: 150px;
+    &>span{
+      padding: 0 10px;
+    }
   }
 
   .phone {
-    padding-left: 20px;
+    padding: 0 20px;
+    margin-left: auto;
+
   }
 
   .delete-btn {
     margin-left: auto;
+    padding-left: 10px;
     background-color: crimson;
     color: white;
+
   }
 }
 </style>

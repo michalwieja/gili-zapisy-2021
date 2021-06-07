@@ -14,6 +14,10 @@
   overflow-x: hidden;
 }
 
+.disabled{
+  color: #aaa;
+}
+
 .row a {
   text-decoration: none;
   transition: 0.5s;

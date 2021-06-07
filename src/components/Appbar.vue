@@ -74,8 +74,9 @@
           <span class="headline">Moje zajęcia</span>
         </v-card-title>
         <div v-if="user_events.length === 0" class="pb-10">Nie masz jeszcze żadnych zajęć</div>
-        <UserEvent v-for="event in user_events" :key="event.id" :event="event"/>
-        <small v-if="user_events.length" class="pb-10">Jeżeli chcesz zrezygnować z zajęć poinformuj
+        <UserEvent v-for="event in user_events" :key="event.id" :event="event"
+        :class="{disabled: isBefore(event.start)}"/>
+        <small v-if="user_events.length" >Jeżeli chcesz zrezygnować z zajęć poinformuj
           nas o tym telefonicznie <a
               href="tel:513-922-938">513-922-938</a></small>
 
@@ -315,7 +316,8 @@ export default {
 
   },
   computed: {
-    ...mapGetters(['logged_user', 'events'])
+    ...mapGetters(['logged_user', 'events']),
+
   },
   mounted() {
     auth.onAuthStateChanged(async (user) => {
@@ -332,6 +334,10 @@ export default {
   },
   methods: {
     ...mapActions(['setUser']),
+
+    isBefore(date){
+      return moment(date).isBefore(moment())
+    },
     //rejestracja
     async submit_sign_in() {
       try {
