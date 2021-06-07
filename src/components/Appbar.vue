@@ -427,6 +427,7 @@ export default {
           })
         }
       })
+      this.user_events.sort((a,b) => a.start.localeCompare(b.start))
     },
     //end
 
