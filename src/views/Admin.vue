@@ -199,8 +199,7 @@ export default {
         end: this.end,
         details: this.details,
         seats: this.seats,
-        reserved: 0,
-        users: [],
+       users: [],
       };
 
       console.log(item);

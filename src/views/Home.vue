@@ -114,8 +114,8 @@
                   <div>opis: {{ selectedEvent.details }}</div>
                   <br>
                   <div>
-                    Liczba miejsc: <b>
-                    <span v-html="selectedEvent.reserved"></span> /
+                    Liczba zajętych miejsc: <b>
+                    <span v-html="selectedEvent.usersRef.length"></span> /
                     <span v-html="selectedEvent.seats"></span></b>
                   </div>
                 </v-card-text>
@@ -130,8 +130,8 @@
                   <div>opis: {{ selectedEvent.details }}</div>
                   <br>
                   <div>
-                    Liczba miejsc: <b>
-                    <span>{{ selectedEvent.reserved }}</span> /
+                    Liczba zajętych miejsc: <b>
+                    <span>{{ selectedEvent.usersRef.length }}</span> /
                     <span v-html="selectedEvent.seats"></span></b>
                   </div>
                 </v-card-text>
@@ -142,14 +142,14 @@
                   <v-btn-toggle v-if="logged_user && !logged_user.isAdmin">
                     <v-btn
                         :color="selectedEvent.color"
-                        :disabled="selectedEvent.reserved >= selectedEvent.seats"
+                        :disabled="selectedEvent.usersRef.length >= selectedEvent.seats"
                         class="white-font"
                         @click="openSignUpModal"
                     >
                       Zapisz
                     </v-btn>
                     <v-btn
-                        v-if="selectedEvent.reserved >= selectedEvent.seats"
+                        v-if="selectedEvent.usersRef.length >= selectedEvent.seats"
                         :color="selectedEvent.color"
                         class="white-font"
                         @click="openSignUpModal"
@@ -279,11 +279,11 @@ export default {
     async submit_sign_up() {
       await db.collection('schedule').doc(this.selectedEvent.id).update({
         usersRef: [...this.selectedEvent.usersRef, this.logged_user.uid],
-        reserved: this.selectedEvent.reserved += 1
+
       });
 
       this.sign_up_dialog = false;
-      this.alert = this.selectedEvent.reserved >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
+      this.alert = this.selectedEvent.usersRef.length >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
       this.fetchEvents();
     },
     async deleteClass(event) {

@@ -413,7 +413,6 @@ export default {
         price: this.add_modal_selected_event.price,
         time: this.add_modal_selected_event.time,
         who: this.add_modal_selected_event.who,
-        reserved: 0,
         usersRef: [],
       };
 
