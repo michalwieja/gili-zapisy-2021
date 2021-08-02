@@ -1,7 +1,7 @@
 <template>
   <div v-if="user" class="user">
-    <div class="name" :class="index +1> event.seats && 'disabled'">
-      <span>{{index + 1}}</span>
+    <div class="name" :class="index +1 > event.seats && 'disabled'">
+      <span>{{ index + 1 }}</span>
       <span>{{ user.firstName }} {{ user.lastName }}</span>
     </div>
     <div class="phone"><a href="tel:${user.phone }"> {{ user.phone }}</a></div>
@@ -16,35 +16,38 @@ import { db } from '@/main';
 import { mapActions } from 'vuex';
 
 export default {
-  name: "User",
-  props: ['id', 'users', 'event','index'],
+  name: 'User',
+  props: ['id', 'users', 'event', 'index'],
   computed: {
     user() {
-      return this.users.find(user => user.uid === this.id)
+      return this.users.find(user => user.uid === this.id);
     }
   },
   methods: {
     ...mapActions(['fetchEvents', 'fetchUsers']),
 
     async remove_user() {
-      await db.collection('schedule').doc(this.event.id).update({
-        usersRef: this.event.usersRef.filter(user => user !== this.id),
-
-      });
-      await this.fetchEvents()
-      await this.fetchUsers()
+      await db.collection('schedule')
+          .doc(this.event.id)
+          .update({
+            usersRef: this.event.usersRef.filter(user => user !== this.id),
+          });
+      await this.fetchEvents();
+      await this.fetchUsers();
     }
   }
-}
+};
 </script>
 
 <style lang="scss">
 .user {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
 
   .name {
     min-width: 150px;
-    &>span{
+
+    & > span {
       padding: 0 10px;
     }
   }
@@ -52,15 +55,27 @@ export default {
   .phone {
     padding: 0 20px;
     margin-left: auto;
-
   }
 
   .delete-btn {
     margin-left: auto;
-    padding-left: 10px;
     background-color: crimson;
     color: white;
+    height: 26px !important;
+    min-width: 30px !important;
+    padding: 0 10px !important;
+  }
+}
 
+@media (max-width: 800px) {
+
+  .user{
+    .name{
+      min-width: 125px !important;
+      &>span{
+        padding: 0 2px !important;
+      }
+    }
   }
 }
 </style>

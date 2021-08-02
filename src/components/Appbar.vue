@@ -1,8 +1,8 @@
 <template>
   <div>
-    <v-app-bar :color="selectedEvent.color" :height="isMobile ? '80':'150'" app dark class="header">
+    <v-app-bar :color="selectedEvent.color" :height="isMobile ? '80':'100'" app dark class="header">
       <RouterLink to="/" class="mr-auto">
-        <img :height="isMobile ? '60':'120'" alt="logo" src="@/assets/logo.svg"/>
+        <img :height="isMobile ? '60':'80'" alt="logo" src="@/assets/logo.svg"/>
       </RouterLink>
       <div v-if="!logged_user">
         <v-btn-toggle background-color="transparent">
@@ -10,7 +10,7 @@
           <v-btn @click="sign_in_dialog=true; error=null">Zarejestruj się</v-btn>
         </v-btn-toggle>
       </div>
-      <div v-else class="d-flex align-center ">
+      <div v-else class="d-flex align-center header-content">
         <h2 class="mr-10" v-if="logged_user.isAdmin">Witaj {{ logged_user.firstName }}, jesteś prezesem</h2>
         <h2 class="mr-10" v-if="!logged_user.isAdmin">Witaj {{ logged_user.firstName }}, zapisz się na zajęcia</h2>
         <v-btn-toggle background-color="transparent">

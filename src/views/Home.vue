@@ -1,8 +1,11 @@
 <template>
+
   <v-app>
+
     <Appbar :selected-event="selectedEvent" :is-mobile="isMobile"
             :classes="classes" :colors="colors"/>
     <v-main>
+      <v-btn @click="handleBuy">sandbox</v-btn>
       <v-row class="fill-height">
         <v-col>
           <!--          calendar menu-->
@@ -237,7 +240,10 @@ import User from '@/components/User';
 
 export default {
   name: 'App',
-  components: { User, Appbar },
+  components: {
+    User,
+    Appbar
+  },
   data: () => ({
     weekdays: [1, 2, 3, 4, 5, 6, 0],
     colors,
@@ -276,11 +282,38 @@ export default {
   methods: {
     ...mapActions(['fetchEvents', 'fetchUsers', 'setUser']),
 
-    async submit_sign_up() {
-      await db.collection('schedule').doc(this.selectedEvent.id).update({
-        usersRef: [...this.selectedEvent.usersRef, this.logged_user.uid],
+    async handleBuy() {
+      console.warn('klik');
+      const res = await fetch('https://sandbox.przelewy24.pl/api/v1/transaction/register', {
+        method: 'POST',
+        headers:{
+
+        },
+        body:{
+          "merchantId": 129100,
+          "posId": 129100,
+          "sessionId": "test7",
+          "amount": 1,
+          "currency": "PLN",
+          "description": "test order",
+          "email": "john.doe@example.com",
+          "country": "PL",
+          "language": "pl",
+          "method": 0,
+          "urlReturn": "https://www.giligili.pl",
+          "sign": "3b8561a254b1907cecae9d522bd44f84f7a2f23225a2e3295c5f45fcbb30d239799a87cb288ccf67e3efe14e36a89ee4"
+        },
 
       });
+      console.warn(res);
+    },
+
+    async submit_sign_up() {
+      await db.collection('schedule')
+          .doc(this.selectedEvent.id)
+          .update({
+            usersRef: [...this.selectedEvent.usersRef, this.logged_user.uid],
+          });
 
       this.sign_up_dialog = false;
       this.alert = this.selectedEvent.usersRef.length >= this.selectedEvent.seats ? `Dziękujemy za zapisanie się na listę rezerwową. Jeżeli zwolni się miejsce skontaktujemy się z Tobą telefonicznie` : `Gratulacje! Widzimy się na zajęciach :)`;
@@ -288,10 +321,12 @@ export default {
     },
     async deleteClass(event) {
       if (confirm('Na pewno chcesz usunąć?')) {
-        await db.collection('schedule').doc(event.id).delete();
+        await db.collection('schedule')
+            .doc(event.id)
+            .delete();
         this.selectedOpen = false;
         this.fetchEvents();
-        this.fetchUsers()
+        this.fetchUsers();
       }
     },
 
@@ -304,7 +339,7 @@ export default {
     },
 
     handleCurrentWeekClick() {
-      this.setToday()
+      this.setToday();
       this.type = 'week';
     },
     getEventColor(ev) {
@@ -324,9 +359,9 @@ export default {
       this.$refs.calendar.next();
     },
     showEvent({
-                nativeEvent,
-                event,
-              }) {
+      nativeEvent,
+      event,
+    }) {
       const open = () => {
         this.selectedEvent = event;
 
