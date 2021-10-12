@@ -11,8 +11,10 @@
         </v-btn-toggle>
       </div>
       <div v-else class="d-flex align-center header-content">
-        <h2 class="mr-10" v-if="logged_user.isAdmin">Witaj {{ logged_user.firstName }}, jesteś prezesem</h2>
-        <h2 class="mr-10" v-if="!logged_user.isAdmin">Witaj {{ logged_user.firstName }}, zapisz się na zajęcia</h2>
+        <h2 class="mr-10" v-if="logged_user.isAdmin">Witaj {{ logged_user.firstName }}, jesteś
+          prezesem</h2>
+        <h2 class="mr-10" v-if="!logged_user.isAdmin">Witaj {{ logged_user.firstName }}, zapisz się
+          na zajęcia</h2>
         <v-btn-toggle background-color="transparent">
           <v-btn v-if="!logged_user.isAdmin" @click="showUserEvents">Moje zajęcia</v-btn>
           <v-btn v-if="logged_user.isAdmin" @click="handleAddButton">Dodaj</v-btn>
@@ -75,8 +77,8 @@
         </v-card-title>
         <div v-if="user_events.length === 0" class="pb-10">Nie masz jeszcze żadnych zajęć</div>
         <UserEvent v-for="event in user_events" :key="event.id" :event="event"
-        :class="{disabled: isBefore(event.start)}"/>
-        <small v-if="user_events.length" >Jeżeli chcesz zrezygnować z zajęć poinformuj
+                   :class="{disabled: isBefore(event.start)}"/>
+        <small v-if="user_events.length">Jeżeli chcesz zrezygnować z zajęć poinformuj
           nas o tym telefonicznie <a
               href="tel:513-922-938">513-922-938</a></small>
 
@@ -208,6 +210,7 @@
                       v-model="add_modal_selected_event.color"
                       :items="colors"
                       label="Kolor"
+                      required
                   >
                   </v-select>
                 </v-col>
@@ -221,6 +224,7 @@
                   <v-text-field
                       v-model="add_modal_selected_event.price"
                       label="Cena"
+                      required
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -287,7 +291,10 @@ const modal_event_factory = {
 export default {
   name: 'Appbar',
   props: ['selectedEvent', 'isMobile', 'classes', 'colors'],
-  components: { UserEvent, datetime: Datetime },
+  components: {
+    UserEvent,
+    datetime: Datetime
+  },
 
   data() {
     return {
@@ -312,7 +319,7 @@ export default {
         'auth/weak-password': 'Hasło musi mieć co najmniej 6 znaków',
         'auth/email-already-in-use': 'Użytkownik już istnieje'
       }
-    }
+    };
 
   },
   computed: {
@@ -321,37 +328,41 @@ export default {
   },
   mounted() {
     auth.onAuthStateChanged(async (user) => {
-      if (!user || (user && !user.uid)) return
-      const userRef = db.collection('users').doc(user.uid);
+      if (!user || (user && !user.uid)) return;
+      const userRef = db.collection('users')
+          .doc(user.uid);
       const doc = await userRef.get();
       if (!doc.exists) {
         console.log('No such document!');
       } else {
         const user = doc.data();
-        this.setUser(user)
+        this.setUser(user);
       }
     });
   },
   methods: {
-    ...mapActions(['setUser']),
+    ...mapActions(['setUser', 'fetchEvents']),
 
-    isBefore(date){
-      return moment(date).isBefore(moment())
+    isBefore(date) {
+      return moment(date)
+          .isBefore(moment());
     },
     //rejestracja
     async submit_sign_in() {
       try {
-        const res = await auth.createUserWithEmailAndPassword(this.user.email, this.user.password)
+        const res = await auth.createUserWithEmailAndPassword(this.user.email, this.user.password);
         if (!res) {
           this.error = 'Nie można było zarejstrować';
         }
-        await db.collection('users').doc(res.user.uid).set({
-          firstName: this.user.firstName,
-          lastName: this.user.lastName,
-          phone: this.user.phone,
-          uid: res.user.uid,
-          email: this.user.email,
-        })
+        await db.collection('users')
+            .doc(res.user.uid)
+            .set({
+              firstName: this.user.firstName,
+              lastName: this.user.lastName,
+              phone: this.user.phone,
+              uid: res.user.uid,
+              email: this.user.email,
+            });
         this.sign_in_dialog = false;
         this.user = {};
       }
@@ -364,19 +375,19 @@ export default {
     // logowanie
     async submit_log_in() {
       try {
-        const res = await auth.signInWithEmailAndPassword(this.user.email, this.user.password)
+        const res = await auth.signInWithEmailAndPassword(this.user.email, this.user.password);
         if (!res) {
           this.error = 'Nie można było zalogować';
         }
 
-        this.setUser(res.user)
+        this.setUser(res.user);
         this.log_in_dialog = false;
         this.user = {};
 
 
       }
       catch (err) {
-        this.error = 'Hasło jest nieprawidłowe lub taki użytkownik nie istnieje'
+        this.error = 'Hasło jest nieprawidłowe lub taki użytkownik nie istnieje';
         this.user = {};
       }
     },
@@ -386,10 +397,10 @@ export default {
     logout() {
       try {
         auth.signOut();
-        this.setUser(null)
+        this.setUser(null);
       }
       catch (err) {
-        this.error = err
+        this.error = err;
       }
 
     },
@@ -404,9 +415,11 @@ export default {
     async submit_add() {
       const item = {
         name: this.add_modal_selected_event.name,
-        color: this.add_modal_selected_event.color.value,
-        start: moment(this.add_modal_selected_event.start).format('YYYY-MM-DD HH:mm'),
-        end: moment(this.add_modal_selected_event.end).format('YYYY-MM-DD HH:mm'),
+        color: this.add_modal_selected_event.color || '#C87072',
+        start: moment(this.add_modal_selected_event.start)
+            .format('YYYY-MM-DD HH:mm'),
+        end: moment(this.add_modal_selected_event.end)
+            .format('YYYY-MM-DD HH:mm'),
         details: this.add_modal_selected_event.short,
         seats: this.add_modal_selected_event.seats,
         teacher: this.add_modal_selected_event.teacher,
@@ -416,9 +429,12 @@ export default {
         usersRef: [],
       };
 
-      await db.collection('schedule').doc().set(item);
+      await db.collection('schedule')
+          .doc()
+          .set(item);
+
       this.add_dialog = false;
-      this.getEvents();
+      await this.fetchEvents();
     },
     //end
 
@@ -428,11 +444,11 @@ export default {
       this.user_events = this.events.filter(event => {
         if (event.usersRef) {
           return event.usersRef.some(user_uid => {
-            return this.logged_user.uid == user_uid
-          })
+            return this.logged_user.uid == user_uid;
+          });
         }
-      })
-      this.user_events.sort((a,b) => a.start.localeCompare(b.start))
+      });
+      this.user_events.sort((a, b) => a.start.localeCompare(b.start));
     },
     //end
 
@@ -444,6 +460,6 @@ export default {
       }
     },
   }
-}
+};
 </script>
 

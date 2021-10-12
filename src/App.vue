@@ -52,6 +52,13 @@ html{
   text-transform: uppercase;
 }
 
+.pl-1{
+  width: 100%;
+  text-overflow:ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 @media (max-width: 800px) {
   .v-application {
     .header-content.align-center {
