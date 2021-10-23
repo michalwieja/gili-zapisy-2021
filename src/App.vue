@@ -98,9 +98,8 @@ html{
   }
 
   .v-event-timed {
-    width: auto !important;
     font-size: 14px !important;
-    padding: 14px !important;
+    padding: 0px !important;
     z-index: 3;
   }
 

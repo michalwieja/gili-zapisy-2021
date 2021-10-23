@@ -180,36 +180,35 @@
                 </v-col>
                 <v-col cols="12" md="6" sm="12">
                   <v-text-field v-model="add_modal_selected_event.name" label="Nazwa" required>
-
                   </v-text-field>
                 </v-col>
                 <v-col cols="6" md="6" sm="6">
-                  <v-text-field v-model="add_modal_selected_event.teacher"
-                                label="Prowadzący"
-                                required>
-
-                  </v-text-field>
+                  <v-text-field
+                      v-model="add_modal_selected_event.teacher"
+                      label="Prowadzący"
+                      required
+                  />
                 </v-col>
                 <v-col cols="6" md="6" sm="6">
-                  <v-text-field v-model="add_modal_selected_event.who"
-                                label="dla kogo"
-                                required>
-
-                  </v-text-field>
+                  <v-text-field
+                      v-model="add_modal_selected_event.who"
+                      label="dla kogo"
+                      required
+                  />
                 </v-col>
                 <v-col cols="6" md="3" sm="3">
-                  <v-text-field v-model="add_modal_selected_event.time"
-                                label="Czas"
-                                required>
-
-                  </v-text-field>
+                  <v-text-field
+                      v-model="add_modal_selected_event.time"
+                      label="Czas"
+                      required
+                  />
                 </v-col>
-
                 <v-col cols="6" md="3" sm="3">
                   <v-select
                       v-model="add_modal_selected_event.color"
                       :items="colors"
                       label="Kolor"
+                      :rules="[(v) => !!v || 'Kolor jest wymagany']"
                       required
                   >
                   </v-select>
@@ -218,24 +217,22 @@
                   <v-text-field
                       v-model="add_modal_selected_event.seats"
                       label="Miejsc"
-                  ></v-text-field>
+                  />
                 </v-col>
                 <v-col cols="6" md="3" sm="3">
                   <v-text-field
                       v-model="add_modal_selected_event.price"
                       label="Cena"
                       required
-                  ></v-text-field>
+                  />
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
                       v-model="add_modal_selected_event.short"
                       label="opis"
                       required
-                  ></v-text-field>
-
+                  />
                 </v-col>
-
                 <v-col cols="12" sm="6">
                   <datetime
                       v-model="add_modal_selected_event.start" :minute-step="15"
@@ -243,10 +240,9 @@
                       placeholder="Start"
                       required="true"
                       type="datetime"
-                  ></datetime>
+                  />
                 </v-col>
                 <v-col cols="12" sm="6">
-
                   <datetime
                       v-model="add_modal_selected_event.end"
                       :minute-step="15"
@@ -279,7 +275,7 @@ import UserEvent from '@/components/UserEvent';
 
 const modal_event_factory = {
   teacher: null,
-  color: null,
+  color: '#C87072',
   start: null,
   seats: null,
   details: null,
@@ -402,7 +398,6 @@ export default {
       catch (err) {
         this.error = err;
       }
-
     },
     //end logout
 
@@ -415,7 +410,7 @@ export default {
     async submit_add() {
       const item = {
         name: this.add_modal_selected_event.name,
-        color: this.add_modal_selected_event.color || '#C87072',
+        color: this.add_modal_selected_event.color,
         start: moment(this.add_modal_selected_event.start)
             .format('YYYY-MM-DD HH:mm'),
         end: moment(this.add_modal_selected_event.end)
