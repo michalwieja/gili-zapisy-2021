@@ -1,7 +1,5 @@
 <template>
-
   <v-app>
-
     <Appbar :selected-event="selectedEvent" :is-mobile="isMobile"
             :classes="classes" :colors="colors"/>
     <v-main>

@@ -1,13 +1,27 @@
 <template>
   <div v-if="user" class="user">
-    <div class="name" :class="index +1 > event.seats && 'disabled'">
-      <span>{{ index + 1 }}</span>
-      <span>{{ user.firstName }} {{ user.lastName }}</span>
+    <div :class="index +1 > event.seats && 'disabled'" class="name d-flex">
+      <div class="mr-1" style="width: 15px">
+        {{ index + 1 }}
+      </div>
+      <div>
+        <div>{{ user.firstName }} {{ user.lastName }}</div>
+        <div class="text-caption">
+          {{ user.email }}
+        </div>
+      </div>
+      <div class="phone ml-auto"><a href="tel:${user.phone }"> {{ user.phone }}</a></div>
+      <v-btn
+          class="white-font delete-btn ml-2"
+          color="red"
+          style="width: 35px"
+          @click="remove_user"
+      >
+        X
+      </v-btn>
+
     </div>
-    <div class="phone"><a href="tel:${user.phone }"> {{ user.phone }}</a></div>
-    <v-btn @click="remove_user" class="white-font delete-btn"
-           color="red">X
-    </v-btn>
+
   </div>
 </template>
 
@@ -69,10 +83,11 @@ export default {
 
 @media (max-width: 800px) {
 
-  .user{
-    .name{
+  .user {
+    .name {
       min-width: 125px !important;
-      &>span{
+
+      & > span {
         padding: 0 2px !important;
       }
     }
