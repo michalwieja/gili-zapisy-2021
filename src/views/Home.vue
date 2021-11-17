@@ -1,7 +1,7 @@
 <template>
   <v-app>
-    <Appbar :selected-event="selectedEvent" :is-mobile="isMobile"
-            :classes="classes" :colors="colors"/>
+    <Appbar :classes="classes" :colors="colors"
+            :is-mobile="isMobile" :selected-event="selectedEvent"/>
     <v-main>
       <v-row class="fill-height">
         <v-col>
@@ -30,10 +30,10 @@
               <v-menu bottom right>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
-                      v-bind="attrs"
-                      v-on="on"
                       color="grey darken-2"
                       outlined
+                      v-bind="attrs"
+                      v-on="on"
                   >
                     <span>{{ typeToLabel[type] }}</span>
                     <v-icon right> mdi-menu-down</v-icon>
@@ -70,9 +70,9 @@
                 :first-interval="9"
                 :interval-count="10"
                 :type="type"
+                :weekdays="weekdays"
                 color="#ddd"
                 locale="pl"
-                :weekdays="weekdays"
                 @click:date="viewDay"
                 @click:event="showEvent"
                 @click:more="viewDay"
@@ -97,10 +97,10 @@
                       v-for="(user, index) in selectedEvent.usersRef"
                       :key="user"
                   >
-                    <User :id="user" :index="index" :users="users" :event="selectedEvent"/>
+                    <User :id="user" :event="selectedEvent" :index="index" :users="users"/>
                   </v-card-text>
                   <v-divider></v-divider>
-                  <v-card-text v-for="user in selectedEvent.users" v-html="user" :key="user.id">
+                  <v-card-text v-for="user in selectedEvent.users" :key="user.id" v-html="user">
                   </v-card-text>
                 </v-card-text>
                 <v-card-text v-else-if="logged_user && !logged_user.isAdmin">
@@ -136,7 +136,7 @@
                   </div>
                 </v-card-text>
                 <v-card-actions>
-                  <div class="text-center" v-if="!logged_user">Zaloguj się lub zarejstruj aby móc
+                  <div v-if="!logged_user" class="text-center">Zaloguj się lub zarejstruj aby móc
                     się zapisać
                   </div>
                   <v-btn-toggle v-if="logged_user && !logged_user.isAdmin">
@@ -232,7 +232,7 @@ import { auth, db } from '@/main.js';
 import colors from '../config/colors.js';
 import classes from '../config/classes.js';
 import Appbar from '@/components/Appbar';
-import { mapGetters, mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import User from '@/components/User';
 
 export default {
@@ -242,7 +242,7 @@ export default {
     Appbar
   },
   data: () => ({
-    weekdays: [0, 1, 2, 3, 4, 5, 6],
+    weekdays: [1, 2, 3, 4, 5, 6, 0],
     colors,
     classes,
     focus: '',
