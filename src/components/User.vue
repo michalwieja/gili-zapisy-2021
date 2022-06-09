@@ -1,7 +1,7 @@
 <template>
   <div v-if="user" class="user">
     <div :class="index +1 > event.seats && 'disabled'" class="name d-flex">
-      <div class="mr-1" style="width: 15px">
+      <div class="mr-1" style="width: 20px">
         {{ index + 1 }}
       </div>
       <div>

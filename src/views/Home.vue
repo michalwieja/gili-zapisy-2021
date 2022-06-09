@@ -58,7 +58,7 @@
           </v-sheet>
           <!--          end calendar menu-->
           <!--          calendar-->
-          <v-sheet height="600">
+          <v-sheet>
             <v-alert v-if="alert" dense text type="success">
               {{ alert }}
             </v-alert>
@@ -68,7 +68,7 @@
                 :event-color="getEventColor"
                 :events="events"
                 :first-interval="9"
-                :interval-count="10"
+                :interval-count="12"
                 :type="type"
                 :weekdays="weekdays"
                 color="#ddd"
@@ -93,12 +93,14 @@
                   <v-card-text v-if="selectedEvent.usersRef.length ===0">Jeszcze nikt
                     się nie zapisał :(
                   </v-card-text>
-                  <v-card-text
-                      v-for="(user, index) in selectedEvent.usersRef"
-                      :key="user"
-                  >
-                    <User :id="user" :event="selectedEvent" :index="index" :users="users"/>
-                  </v-card-text>
+                  <div style="max-height: 800px; overflow-y: scroll">
+                    <v-card-text
+                        v-for="(user, index) in selectedEvent.usersRef"
+                        :key="user"
+                    >
+                      <User :id="user" :event="selectedEvent" :index="index" :users="users"/>
+                    </v-card-text>
+                  </div>
                   <v-divider></v-divider>
                   <v-card-text v-for="user in selectedEvent.users" :key="user.id" v-html="user">
                   </v-card-text>
